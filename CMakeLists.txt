@@ -12,6 +12,7 @@ target_compile_features(ExecutableMalloc PRIVATE cxx_std_20)
 target_compile_options(ExecutableMalloc PRIVATE "-Ofast")
 
 if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory("Extensions/PosixAllocator")
     enable_testing()
     add_subdirectory("Example")
 endif()

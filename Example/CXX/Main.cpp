@@ -1,42 +1,13 @@
 #include "ExecutableMalloc.hpp"
+#include "ExecutableMalloc/PosixAllocator.hpp"
 
 #include <cstdint>
 #include <iostream>
-#include <sys/mman.h>
 #include <cassert>
 
 using namespace ExecutableMalloc;
 
-static const std::size_t pageSize = getpagesize();
-
-constexpr static std::uintptr_t align(std::uintptr_t ptr, std::size_t alignment)
-{
-	return ptr - ptr % alignment;
-}
-
-MemoryBlockAllocator allocator{
-	[](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
-		// "If another mapping already exists there, the kernel picks a new address that may or may not depend on the hint" - mmap manual
-		// Some kernels may respect the hint but to be sure that this works, lets do it manually
-		for (std::size_t offset = 0; offset < tolerance; offset += pageSize)
-			for (int sign = -1; sign <= 2; sign += 2) {
-				void* pointer = mmap(
-					reinterpret_cast<char*>(align(preferredLocation, pageSize)) + offset * sign,
-					pageSize * numPages,
-					PROT_READ | PROT_WRITE | PROT_EXEC,
-					MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
-					-1,
-					0);
-				if (pointer != MAP_FAILED)
-					return reinterpret_cast<std::uintptr_t>(pointer);
-			}
-		throw std::bad_alloc{};
-	},
-	[](std::uintptr_t location, std::size_t size) {
-		munmap(reinterpret_cast<void*>(location), size);
-	},
-	pageSize
-};
+PosixMemoryBlockAllocator allocator;
 
 void printMemory()
 {
@@ -74,7 +45,7 @@ int main();
 
 void test()
 {
-	const auto pageSize_d = static_cast<double>(pageSize);
+	const auto pageSize_d = static_cast<double>(posixGetGranularity());
 	printMemory();
 	auto reg1 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << reg1 << std::endl;

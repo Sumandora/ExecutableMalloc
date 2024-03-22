@@ -53,6 +53,8 @@ std::unique_ptr<MemoryMapping>& MemoryBlockAllocator::getBlock(std::uintptr_t pr
 
 std::shared_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable)
 {
+	if(size == 0)
+		throw std::bad_alloc{};
 	auto& block = getBlock(preferredLocation, size, tolerance, writable);
 	return block->acquireRegion(size);
 }
