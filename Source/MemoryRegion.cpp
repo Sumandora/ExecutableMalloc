@@ -31,7 +31,7 @@ std::strong_ordering MemoryRegion::operator<=>(const MemoryRegion& other) const
 	return from <=> other.from;
 }
 
-bool MemoryRegion::isWritable()
+bool MemoryRegion::isWritable() const
 {
 	return parent->isWritable();
 }

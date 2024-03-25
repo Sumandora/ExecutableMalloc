@@ -32,8 +32,8 @@ void printMemory()
 	std::cout << "- Memory dump end" << std::endl;
 }
 
-void assertMemory(std::size_t mappings, std::initializer_list<std::size_t> regions) {
-	assert(allocator.getMappings().size() == mappings);
+void assertMemory(std::initializer_list<std::size_t> regions) {
+	assert(allocator.getMappings().size() == regions.size());
 	auto regsize = regions.begin();
 	for(std::size_t i = 0; i < regions.size(); i++) {
 		assert(allocator.getMappings()[i]->getUsedRegions().size() == *regsize);
@@ -49,31 +49,31 @@ void test()
 	printMemory();
 	auto reg1 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << reg1 << std::endl;
-	assertMemory(1, { 1 });
+	assertMemory({ 1 });
 	printMemory();
 	auto reg2 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 0.33));
 	std::cout << reg2 << std::endl;
-	assertMemory(1, { 2 });
+	assertMemory({ 2 });
 	printMemory();
 	auto reg3 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << reg3 << std::endl;
-	assertMemory(2, { 2, 1 });
+	assertMemory({ 2, 1 });
 	printMemory();
 	auto reg4 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 0.33));
 	std::cout << reg4 << std::endl;
-	assertMemory(2, { 2, 2 });
+	assertMemory({ 2, 2 });
 	printMemory();
 	auto reg5 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << reg5 << std::endl;
-	assertMemory(3, { 2, 2, 1 });
+	assertMemory({ 2, 2, 1 });
 	printMemory();
 }
 
 int main()
 {
-	assertMemory(0, {});
+	assertMemory({});
 	test();
 	printMemory();
-	assertMemory(0, {});
+	assertMemory({});
 	return 0;
 }

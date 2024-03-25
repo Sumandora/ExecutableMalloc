@@ -19,8 +19,11 @@ namespace ExecutableMalloc {
 		std::uintptr_t to;
 		MemoryMapping* parent;
 
-	public:
+		friend MemoryMapping;
+
 		MemoryRegion(std::uintptr_t from, std::uintptr_t to, MemoryMapping* parent);
+
+	public:
 		MemoryRegion() = delete;
 		MemoryRegion(const MemoryRegion&) = delete;
 		~MemoryRegion();
@@ -31,7 +34,7 @@ namespace ExecutableMalloc {
 		[[nodiscard]] std::uintptr_t getTo() const;
 		[[nodiscard]] const MemoryMapping* getParent() const;
 
-		bool isWritable();
+		[[nodiscard]] bool isWritable() const;
 		void setWritable(bool writable);
 	};
 
@@ -39,11 +42,13 @@ namespace ExecutableMalloc {
 		MemoryBlockAllocator* parent;
 		std::uintptr_t from;
 		std::uintptr_t to;
-		std::set<MemoryRegion*> usedRegions;
+		std::vector<MemoryRegion*> usedRegions;
 		bool writable;
 
 		friend MemoryRegion;
 		friend MemoryBlockAllocator;
+
+		MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, std::uintptr_t to, bool writable);
 
 		[[nodiscard]] std::size_t distanceTo(std::uintptr_t address, std::size_t size) const;
 		std::strong_ordering operator<=>(const MemoryMapping& other) const;
@@ -51,14 +56,12 @@ namespace ExecutableMalloc {
 		void setWritable(bool newWritable);
 		std::unique_ptr<MemoryRegion> acquireRegion(size_t size);
 		void gc(MemoryRegion* region);
-
 	public:
-		MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, std::uintptr_t to, bool writable);
 
 		[[nodiscard]] const MemoryBlockAllocator* getParent() const;
 		[[nodiscard]] std::uintptr_t getFrom() const;
 		[[nodiscard]] std::uintptr_t getTo() const;
-		[[nodiscard]] std::set<MemoryRegion*> getUsedRegions() const;
+		[[nodiscard]] const std::vector<MemoryRegion*>& getUsedRegions() const;
 		[[nodiscard]] bool isWritable() const;
 	};
 
@@ -79,6 +82,9 @@ namespace ExecutableMalloc {
 			decltype(deallocateMemory)&& deallocateMemory,
 			std::size_t granularity
 		);
+		MemoryBlockAllocator(const MemoryBlockAllocator&) = delete; // Don't copy this around blindly
+		void operator=(const MemoryBlockAllocator&) = delete;
+		virtual ~MemoryBlockAllocator();
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 

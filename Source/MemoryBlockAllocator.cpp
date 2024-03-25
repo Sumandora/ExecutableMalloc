@@ -16,6 +16,8 @@ MemoryBlockAllocator::MemoryBlockAllocator(
 {
 }
 
+MemoryBlockAllocator::~MemoryBlockAllocator() = default;
+
 const std::vector<std::unique_ptr<MemoryMapping>>& MemoryBlockAllocator::getMappings() const
 {
 	return mappings;
@@ -48,7 +50,7 @@ std::unique_ptr<MemoryMapping>& MemoryBlockAllocator::getBlock(std::uintptr_t pr
 	auto numPages = static_cast<std::size_t>(ceilf(static_cast<float>(size) / static_cast<float>(granularity)));
 	auto effectiveSize = granularity * numPages;
 	std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
-	return mappings.emplace_back(std::make_unique<MemoryMapping>(this, newMem, newMem + effectiveSize, writable));
+	return mappings.emplace_back(std::unique_ptr<MemoryMapping>{ new MemoryMapping{ this, newMem, newMem + effectiveSize, writable } });
 }
 
 std::shared_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable)

@@ -12,23 +12,28 @@ MemoryMapping::MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, 
 {
 }
 
-const MemoryBlockAllocator* MemoryMapping::getParent() const {
+const MemoryBlockAllocator* MemoryMapping::getParent() const
+{
 	return parent;
 }
 
-std::uintptr_t MemoryMapping::getFrom() const {
+std::uintptr_t MemoryMapping::getFrom() const
+{
 	return from;
 }
 
-std::uintptr_t MemoryMapping::getTo() const {
+std::uintptr_t MemoryMapping::getTo() const
+{
 	return to;
 }
 
-std::set<MemoryRegion*> MemoryMapping::getUsedRegions() const {
+const std::vector<MemoryRegion*>& MemoryMapping::getUsedRegions() const
+{
 	return usedRegions;
 }
 
-bool MemoryMapping::isWritable() const {
+bool MemoryMapping::isWritable() const
+{
 	return writable;
 }
 
@@ -88,16 +93,16 @@ std::unique_ptr<MemoryRegion> MemoryMapping::acquireRegion(size_t size)
 		p = region->getTo();
 	}
 
-	if(p + size > to)
+	if (p + size > to)
 		throw std::bad_alloc{};
-	auto region = std::make_unique<MemoryRegion>(p, p + size, this);
-	usedRegions.insert(region.get());
+	auto region = std::unique_ptr<MemoryRegion>{ new MemoryRegion{ p, p + size, this } };
+	usedRegions.emplace_back(region.get());
 	return region;
 }
 
 void MemoryMapping::gc(MemoryRegion* region)
 {
-	usedRegions.erase(region);
+	std::erase(usedRegions, region);
 	if (usedRegions.empty()) {
 		// F, I'm unemployed ._.
 		parent->gc(this);
