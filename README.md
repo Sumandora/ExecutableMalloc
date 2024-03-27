@@ -51,6 +51,16 @@ The region will be deallocated when `region` goes out of scope.
 
 ### C
 
+For C you need to link against the C wrappers:
+```cmake
+add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/CWrapper")
+target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocCWrapper)
+
+# If you use the PosixAllocator extension
+add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/Extensions/PosixAllocator/CWrapper")
+target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocPosixAllocatorCWrapper)
+```
+
 Create a memory area that is `emalloc_sizeof_memoryblockallocator` or `emalloc_sizeof_posix_memoryblockallocator` bytes big. Depending on what you will use.
 ```c
 // stack allocation:
