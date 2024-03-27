@@ -1,4 +1,3 @@
-#include "ExecutableMalloc.hpp"
 #include "ExecutableMalloc/PosixAllocator.hpp"
 
 #include <cstdint>

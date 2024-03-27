@@ -2,7 +2,7 @@
 #include "ExecutableMalloc/PosixAllocator.h"
 
 #include <assert.h>
-#include <malloc.h>
+#include <alloca.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -79,7 +79,7 @@ void test()
 
 int main()
 {
-	allocator = malloc(emalloc_sizeof_posix_memoryblockallocator);
+	allocator = alloca(emalloc_sizeof_posix_memoryblockallocator);
 	emalloc_construct_posix_memoryblockallocator(allocator);
 
 	assertMemory(0);
@@ -88,7 +88,6 @@ int main()
 	assertMemory(0);
 
 	emalloc_memoryblockallocator_cleanup(allocator);
-	free(allocator);
 
 	return 0;
 }

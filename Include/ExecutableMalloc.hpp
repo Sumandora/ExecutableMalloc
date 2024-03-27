@@ -26,6 +26,7 @@ namespace ExecutableMalloc {
 	public:
 		MemoryRegion() = delete;
 		MemoryRegion(const MemoryRegion&) = delete;
+		void operator=(const MemoryRegion&) = delete;
 		~MemoryRegion();
 
 		std::strong_ordering operator<=>(const MemoryRegion& other) const;
@@ -59,6 +60,7 @@ namespace ExecutableMalloc {
 	public:
 		MemoryMapping() = delete;
 		MemoryMapping(const MemoryMapping&) = delete;
+		void operator=(const MemoryMapping&) = delete;
 
 		[[nodiscard]] const MemoryBlockAllocator* getParent() const;
 		[[nodiscard]] std::uintptr_t getFrom() const;
