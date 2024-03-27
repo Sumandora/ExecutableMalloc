@@ -57,6 +57,8 @@ namespace ExecutableMalloc {
 		std::unique_ptr<MemoryRegion> acquireRegion(size_t size);
 		void gc(MemoryRegion* region);
 	public:
+		MemoryMapping() = delete;
+		MemoryMapping(const MemoryMapping&) = delete;
 
 		[[nodiscard]] const MemoryBlockAllocator* getParent() const;
 		[[nodiscard]] std::uintptr_t getFrom() const;
@@ -88,7 +90,7 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 
-		std::shared_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
+		std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
 	};
 
 }

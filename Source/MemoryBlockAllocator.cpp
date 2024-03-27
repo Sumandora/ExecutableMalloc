@@ -53,7 +53,7 @@ std::unique_ptr<MemoryMapping>& MemoryBlockAllocator::getBlock(std::uintptr_t pr
 	return mappings.emplace_back(std::unique_ptr<MemoryMapping>{ new MemoryMapping{ this, newMem, newMem + effectiveSize, writable } });
 }
 
-std::shared_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable)
+std::unique_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable)
 {
 	if(size == 0)
 		throw std::bad_alloc{};

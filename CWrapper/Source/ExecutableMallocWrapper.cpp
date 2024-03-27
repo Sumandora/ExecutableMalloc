@@ -57,9 +57,9 @@ bool emalloc_mapping_is_writable(const void* memorymapping)
 
 void emalloc_construct_memoryblockallocator(
 	void* memoryblockallocator,
-	findUnusedMemory findUnusedMemory,
+	emalloc_findUnusedMemory findUnusedMemory,
 	void* data1,
-	deallocateMemory deallocateMemory,
+	emalloc_deallocateMemory deallocateMemory,
 	void* data2,
 	size_t granularity)
 {
@@ -81,13 +81,13 @@ size_t emalloc_memoryblockallocator_mappings_count(const void* memoryblockalloca
 	return static_cast<const MemoryBlockAllocator*>(memoryblockallocator)->getMappings().size();
 }
 
-static std::vector<std::shared_ptr<MemoryRegion>> regions;
+static std::vector<std::unique_ptr<MemoryRegion>> regions;
 
-void* emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance, bool writable)
+uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance, bool writable)
 {
-	std::shared_ptr<MemoryRegion> region = static_cast<MemoryBlockAllocator*>(memoryblockallocator)->getRegion(preferredLocation, size, tolerance, writable);
+	std::unique_ptr<MemoryRegion> region = static_cast<MemoryBlockAllocator*>(memoryblockallocator)->getRegion(preferredLocation, size, tolerance, writable);
 	auto& reg = regions.emplace_back(std::move(region));
-	return reinterpret_cast<void*>(reg.get()->getFrom());
+	return reg.get()->getFrom();
 }
 void emalloc_memoryblockallocator_delete_region(void* pointer)
 {

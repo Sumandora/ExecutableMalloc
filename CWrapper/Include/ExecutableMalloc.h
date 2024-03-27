@@ -26,21 +26,21 @@ const void* emalloc_mapping_used_region_at(const void* memorymapping, size_t ind
 size_t emalloc_mapping_used_regions_count(const void* memorymapping);
 bool emalloc_mapping_is_writable(const void* memorymapping);
 
-typedef uintptr_t(*findUnusedMemory)(uintptr_t preferredLocation, size_t tolerance, size_t numPages, bool writable, void* data);
-typedef void(*deallocateMemory)(uintptr_t location, size_t size, void* data);
+typedef uintptr_t(*emalloc_findUnusedMemory)(uintptr_t preferredLocation, size_t tolerance, size_t numPages, bool writable, void* data);
+typedef void(*emalloc_deallocateMemory)(uintptr_t location, size_t size, void* data);
 
 void emalloc_construct_memoryblockallocator(
 	void* memoryblockallocator,
-	findUnusedMemory findUnusedMemory,
+	emalloc_findUnusedMemory findUnusedMemory,
 	void* data1,
-	deallocateMemory deallocateMemory,
+	emalloc_deallocateMemory deallocateMemory,
 	void* data2,
 	size_t granularity);
 
 const void* emalloc_memoryblockallocator_mapping_at(const void* memoryblockallocator, size_t index);
 size_t emalloc_memoryblockallocator_mappings_count(const void* memoryblockallocator);
 
-void* emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance /*= INT32_MAX*/, bool writable /*= true*/);
+uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance /*= INT32_MAX*/, bool writable /*= true*/);
 void emalloc_memoryblockallocator_delete_region(void* pointer);
 
 void emalloc_memoryblockallocator_cleanup(void* memoryblockallocator);
