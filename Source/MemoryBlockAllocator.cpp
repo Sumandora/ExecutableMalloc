@@ -9,14 +9,14 @@ using namespace ExecutableMalloc;
 MemoryBlockAllocator::MemoryBlockAllocator(
 	decltype(findUnusedMemory)&& findUnusedMemory,
 	decltype(deallocateMemory)&& deallocateMemory,
+	decltype(changePermissions)&& changePermissions,
 	std::size_t granularity)
 	: findUnusedMemory(std::move(findUnusedMemory))
 	, deallocateMemory(std::move(deallocateMemory))
+	, changePermissions(std::move(changePermissions))
 	, granularity(granularity)
 {
 }
-
-MemoryBlockAllocator::~MemoryBlockAllocator() = default;
 
 const std::vector<std::unique_ptr<MemoryMapping>>& MemoryBlockAllocator::getMappings() const
 {
@@ -27,7 +27,7 @@ std::optional<std::reference_wrapper<std::unique_ptr<MemoryMapping>>> MemoryBloc
 {
 	auto available = mappings | std::ranges::views::filter([size](const std::unique_ptr<MemoryMapping>& p) { return p->hasRegion(size); });
 	auto best = std::min_element(available.begin(), available.end(), [location, size](const std::unique_ptr<MemoryMapping>& a, const std::unique_ptr<MemoryMapping>& b) {
-		return std::min(a->distanceTo(location, size), b->distanceTo(location, size));
+		return std::less{}(a->distanceTo(location, size), b->distanceTo(location, size));
 	});
 	if (best == available.end())
 		return std::nullopt;

@@ -73,22 +73,24 @@ namespace ExecutableMalloc {
 		std::vector<std::unique_ptr<MemoryMapping>> mappings;
 		std::function<std::uintptr_t(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)> findUnusedMemory;
 		std::function<void(std::uintptr_t location, std::size_t size)> deallocateMemory;
+		std::function<void(MemoryMapping& mapping, bool newWritable)> changePermissions;
 		std::size_t granularity; // (Page size); The functions declared above are expected to also respect this granularity
 
 		friend MemoryMapping;
 
-		[[nodiscard]] std::optional<std::reference_wrapper<std::unique_ptr<MemoryMapping>>> findClosest(std::uintptr_t location, std::size_t size, bool writable = true);
-		std::unique_ptr<MemoryMapping>& getBlock(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
+		[[nodiscard]] std::optional<std::reference_wrapper<std::unique_ptr<MemoryMapping>>> findClosest(std::uintptr_t location, std::size_t size, bool writable);
+		std::unique_ptr<MemoryMapping>& getBlock(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable);
 		void gc(MemoryMapping* page);
 	public:
 		MemoryBlockAllocator(
 			decltype(findUnusedMemory)&& findUnusedMemory,
 			decltype(deallocateMemory)&& deallocateMemory,
+			decltype(changePermissions)&& changePermissions,
 			std::size_t granularity
 		);
+		MemoryBlockAllocator() = delete;
 		MemoryBlockAllocator(const MemoryBlockAllocator&) = delete; // Don't copy this around blindly
 		void operator=(const MemoryBlockAllocator&) = delete;
-		virtual ~MemoryBlockAllocator();
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 

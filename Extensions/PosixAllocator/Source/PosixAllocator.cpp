@@ -42,10 +42,23 @@ void ExecutableMalloc::posixDeallocateMemory(std::uintptr_t location, std::size_
 	munmap(reinterpret_cast<void*>(location), size);
 }
 
+void ExecutableMalloc::posixChangePermissions(std::uintptr_t location, std::size_t size, bool writable) {
+	int perms = PROT_READ | PROT_WRITE;
+
+	if (writable) {
+		perms |= PROT_EXEC;
+	}
+
+	mprotect(reinterpret_cast<void*>(location), size, perms);
+}
+
 PosixMemoryBlockAllocator::PosixMemoryBlockAllocator()
 	: MemoryBlockAllocator(
 		  posixFindUnusedMemory,
 		  posixDeallocateMemory,
+		  [](MemoryMapping& mapping, bool newWritable) {
+			  posixChangePermissions(mapping.getFrom(), mapping.getTo() - mapping.getFrom(), newWritable);
+		  },
 		  posixGetGranularity())
 {
 }

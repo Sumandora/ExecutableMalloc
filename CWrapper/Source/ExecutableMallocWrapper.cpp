@@ -57,18 +57,22 @@ bool emalloc_mapping_is_writable(const void* memorymapping)
 
 void emalloc_construct_memoryblockallocator(
 	void* memoryblockallocator,
-	emalloc_findUnusedMemory findUnusedMemory,
+	emalloc_find_unused_memory findunusedmemory,
 	void* data1,
-	emalloc_deallocateMemory deallocateMemory,
+	emalloc_deallocate_memory deallocatememory,
 	void* data2,
-	size_t granularity)
-{
+	emalloc_change_permissions changepermissions,
+	void* data3,
+	size_t granularity) {
 	new (memoryblockallocator) MemoryBlockAllocator{
-		[findUnusedMemory, data1](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
-			return findUnusedMemory(preferredLocation, tolerance, numPages, writable, data1);
+		[findunusedmemory, data1](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
+			return findunusedmemory(preferredLocation, tolerance, numPages, writable, data1);
 		},
-		[deallocateMemory, data2](std::uintptr_t location, std::size_t size) {
-			return deallocateMemory(location, size, data2);
+		[deallocatememory, data2](std::uintptr_t location, std::size_t size) {
+			return deallocatememory(location, size, data2);
+		},
+		[changepermissions, data3](MemoryMapping& mapping, bool newWritable) {
+			return changepermissions(&mapping, newWritable, data3);
 		},
 		granularity
 	};

@@ -72,13 +72,7 @@ void MemoryMapping::setWritable(bool newWritable)
 	if (this->writable == newWritable)
 		return;
 
-	int perms = PROT_READ | PROT_WRITE;
-
-	if (newWritable) {
-		perms |= PROT_EXEC;
-	}
-
-	mprotect(reinterpret_cast<void*>(this->from), this->to - this->from, perms);
+	parent->changePermissions(*this, newWritable);
 	this->writable = newWritable;
 }
 

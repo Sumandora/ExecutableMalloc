@@ -9,6 +9,7 @@ namespace ExecutableMalloc {
 	int posixGetGranularity();
 	std::uintptr_t posixFindUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable);
 	void posixDeallocateMemory(std::uintptr_t location, std::size_t size);
+	void posixChangePermissions(std::uintptr_t location, std::size_t size, bool writable);
 
 	class PosixMemoryBlockAllocator : public MemoryBlockAllocator {
 	public:

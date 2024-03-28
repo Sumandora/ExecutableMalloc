@@ -26,15 +26,18 @@ const void* emalloc_mapping_used_region_at(const void* memorymapping, size_t ind
 size_t emalloc_mapping_used_regions_count(const void* memorymapping);
 bool emalloc_mapping_is_writable(const void* memorymapping);
 
-typedef uintptr_t(*emalloc_findUnusedMemory)(uintptr_t preferredLocation, size_t tolerance, size_t numPages, bool writable, void* data);
-typedef void(*emalloc_deallocateMemory)(uintptr_t location, size_t size, void* data);
+typedef uintptr_t(*emalloc_find_unused_memory)(uintptr_t preferredLocation, size_t tolerance, size_t numPages, bool writable, void* data);
+typedef void(*emalloc_deallocate_memory)(uintptr_t location, size_t size, void* data);
+typedef void(*emalloc_change_permissions)(void* mapping, bool newWritable, void* data);
 
 void emalloc_construct_memoryblockallocator(
 	void* memoryblockallocator,
-	emalloc_findUnusedMemory findUnusedMemory,
+	emalloc_find_unused_memory findunusedmemory,
 	void* data1,
-	emalloc_deallocateMemory deallocateMemory,
+	emalloc_deallocate_memory deallocatememory,
 	void* data2,
+	emalloc_change_permissions changepermissions,
+	void* data3,
 	size_t granularity);
 
 const void* emalloc_memoryblockallocator_mapping_at(const void* memoryblockallocator, size_t index);
