@@ -1,6 +1,6 @@
 #include "ExecutableMalloc.hpp"
 
-#include <sys/mman.h>
+#include <ranges>
 
 using namespace ExecutableMalloc;
 
@@ -27,7 +27,7 @@ std::uintptr_t MemoryMapping::getTo() const
 	return to;
 }
 
-const std::vector<MemoryRegion*>& MemoryMapping::getUsedRegions() const
+const decltype(MemoryMapping::usedRegions)& MemoryMapping::getUsedRegions() const
 {
 	return usedRegions;
 }
@@ -37,34 +37,58 @@ bool MemoryMapping::isWritable() const
 	return writable;
 }
 
-constexpr static std::size_t safeSub(std::size_t a, std::size_t b)
-{
-	return std::max(a, b) - std::min(a, b);
-}
-
-[[nodiscard]] std::size_t MemoryMapping::distanceTo(std::uintptr_t address, std::size_t size) const
-{
-	if (size > to) {
-		return safeSub(from, address);
-	}
-	return std::min(safeSub(from, address), safeSub(to - size, address));
-}
-
 std::strong_ordering MemoryMapping::operator<=>(const MemoryMapping& other) const
 {
 	return from <=> other.from;
 }
 
-[[nodiscard]] bool MemoryMapping::hasRegion(size_t size) const
-{
-	std::uintptr_t p = from;
-	for (const MemoryRegion* region : usedRegions) {
-		std::uintptr_t space = region->getFrom() - p;
-		if (space >= size)
-			return true;
-		p = region->getTo();
+template <bool Reverse>
+std::optional<std::uintptr_t> MemoryMapping::findRegion(std::size_t size) const {
+	std::uintptr_t p = Reverse ? to : from;
+	auto begin = [this] {
+		if constexpr(Reverse)
+			return usedRegions.rbegin();
+		else
+			return usedRegions.begin();
+	}();
+	auto end = [this] {
+		if constexpr(Reverse)
+			return usedRegions.rend();
+		else
+			return usedRegions.end();
+	}();
+	for (auto it = begin; it != end; it++) {
+		auto& region = *it;
+		if ((Reverse ? p - region->getTo() : region->getFrom() - p) >= size)
+			return Reverse ? p - size : p;
+		p = Reverse ? region->getFrom() : region->getTo();
 	}
-	return to - p >= size;
+	if ((Reverse ? p - from : to - p) >= size)
+		return Reverse ? p - size : p;
+	return std::nullopt;
+}
+
+template std::optional<std::uintptr_t> MemoryMapping::findRegion<false>(std::size_t size) const;
+template std::optional<std::uintptr_t> MemoryMapping::findRegion<true>(std::size_t size) const;
+
+constexpr inline std::size_t dist(std::size_t a, std::size_t b)
+{
+	return std::max(a, b) - std::min(a, b);
+}
+
+std::optional<std::pair<std::uintptr_t, std::size_t>> MemoryMapping::findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const {
+	if(dist(from, location) > tolerance || dist(to, location) > tolerance)
+		return std::nullopt;
+	for(bool reverse : { false, true }) {
+		auto region = reverse ? findRegion<true>(size) : findRegion<false>(size); // This is so incredibly stupid
+		if(!region.has_value())
+			continue;
+		std::size_t distance = dist(region.value(), location);
+		if (distance > tolerance || dist(region.value() + size, location) > tolerance)
+			continue;
+		return { { region.value(), distance } };
+	}
+	return std::nullopt;
 }
 
 void MemoryMapping::setWritable(bool newWritable)
@@ -76,27 +100,18 @@ void MemoryMapping::setWritable(bool newWritable)
 	this->writable = newWritable;
 }
 
-std::unique_ptr<MemoryRegion> MemoryMapping::acquireRegion(size_t size)
+std::unique_ptr<MemoryRegion> MemoryMapping::acquireRegion(std::uintptr_t location, std::size_t size)
 {
-	std::uintptr_t p = from;
-	for (const MemoryRegion* region : usedRegions) {
-		std::uintptr_t space = region->getFrom() - p;
-		if (space >= size) {
-			break;
-		}
-		p = region->getTo();
-	}
-
-	if (p + size > to)
+	if(location < from || location+size > to)
 		throw std::bad_alloc{};
-	auto region = std::unique_ptr<MemoryRegion>{ new MemoryRegion{ p, p + size, this } };
-	usedRegions.emplace_back(region.get());
+	auto region = std::unique_ptr<MemoryRegion>{ new MemoryRegion{ location, location + size, this } };
+	usedRegions.insert(region.get());
 	return region;
 }
 
 void MemoryMapping::gc(MemoryRegion* region)
 {
-	std::erase(usedRegions, region);
+	usedRegions.erase(region);
 	if (usedRegions.empty()) {
 		// F, I'm unemployed ._.
 		parent->gc(this);

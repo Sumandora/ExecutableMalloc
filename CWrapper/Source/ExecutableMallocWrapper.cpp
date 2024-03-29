@@ -45,7 +45,7 @@ uintptr_t emalloc_mapping_get_to(const void* memorymapping)
 	return static_cast<const MemoryMapping*>(memorymapping)->getTo();
 }
 const void* emalloc_mapping_used_region_at(const void* memorymapping, size_t index) {
-	return static_cast<const MemoryMapping*>(memorymapping)->getUsedRegions().at(index);
+	return *std::next(static_cast<const MemoryMapping*>(memorymapping)->getUsedRegions().begin(), index);
 }
 size_t emalloc_mapping_used_regions_count(const void* memorymapping) {
 	return static_cast<const MemoryMapping*>(memorymapping)->getUsedRegions().size();

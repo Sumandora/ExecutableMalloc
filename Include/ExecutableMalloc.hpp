@@ -23,6 +23,13 @@ namespace ExecutableMalloc {
 
 		MemoryRegion(std::uintptr_t from, std::uintptr_t to, MemoryMapping* parent);
 
+		struct PtrOrder {
+			bool operator()(const MemoryRegion* lhs, const MemoryRegion* rhs) const
+			{
+				return std::less{}(lhs->getFrom(), rhs->getFrom());
+			}
+		};
+
 	public:
 		MemoryRegion() = delete;
 		MemoryRegion(const MemoryRegion&) = delete;
@@ -43,7 +50,7 @@ namespace ExecutableMalloc {
 		MemoryBlockAllocator* parent;
 		std::uintptr_t from;
 		std::uintptr_t to;
-		std::vector<MemoryRegion*> usedRegions;
+		std::set<MemoryRegion*, MemoryRegion::PtrOrder> usedRegions;
 		bool writable;
 
 		friend MemoryRegion;
@@ -51,11 +58,12 @@ namespace ExecutableMalloc {
 
 		MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, std::uintptr_t to, bool writable);
 
-		[[nodiscard]] std::size_t distanceTo(std::uintptr_t address, std::size_t size) const;
 		std::strong_ordering operator<=>(const MemoryMapping& other) const;
-		[[nodiscard]] bool hasRegion(size_t size) const;
+		template <bool Reverse>
+		[[nodiscard]] std::optional<std::uintptr_t> findRegion(std::size_t size) const;
+		[[nodiscard]] std::optional<std::pair<std::uintptr_t, std::size_t>> findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const;
 		void setWritable(bool newWritable);
-		std::unique_ptr<MemoryRegion> acquireRegion(size_t size);
+		[[nodiscard]] std::unique_ptr<MemoryRegion> acquireRegion(std::uintptr_t location, std::size_t size);
 		void gc(MemoryRegion* region);
 	public:
 		MemoryMapping() = delete;
@@ -65,7 +73,7 @@ namespace ExecutableMalloc {
 		[[nodiscard]] const MemoryBlockAllocator* getParent() const;
 		[[nodiscard]] std::uintptr_t getFrom() const;
 		[[nodiscard]] std::uintptr_t getTo() const;
-		[[nodiscard]] const std::vector<MemoryRegion*>& getUsedRegions() const;
+		[[nodiscard]] const decltype(usedRegions)& getUsedRegions() const;
 		[[nodiscard]] bool isWritable() const;
 	};
 
@@ -78,8 +86,7 @@ namespace ExecutableMalloc {
 
 		friend MemoryMapping;
 
-		[[nodiscard]] std::optional<std::reference_wrapper<std::unique_ptr<MemoryMapping>>> findClosest(std::uintptr_t location, std::size_t size, bool writable);
-		std::unique_ptr<MemoryMapping>& getBlock(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable);
+		[[nodiscard]] std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, std::uintptr_t>> findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance);
 		void gc(MemoryMapping* page);
 	public:
 		MemoryBlockAllocator(
@@ -94,7 +101,7 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 
-		std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
+		[[nodiscard]] std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
 	};
 
 }
