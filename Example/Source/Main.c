@@ -49,23 +49,23 @@ void test()
 {
 	const double pageSize_d = (double)emalloc_posix_getGranularity();
 	printMemory();
-	void* reg1 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), INT32_MAX, true);
+	void* reg1 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), true, INT32_MAX);
 	printf("%p\n", reg1);
 	assertMemory(1, 1);
 	printMemory();
-	void* reg2 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 0.33), INT32_MAX, true);
+	void* reg2 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 0.33), true, INT32_MAX);
 	printf("%p\n", reg2);
 	assertMemory(1, 2);
 	printMemory();
-	void* reg3 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), INT32_MAX, true);
+	void* reg3 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), true, INT32_MAX);
 	printf("%p\n", reg3);
 	assertMemory(2, 2, 1);
 	printMemory();
-	void* reg4 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 0.33), INT32_MAX, true);
+	void* reg4 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 0.33), true, INT32_MAX);
 	printf("%p\n", reg4);
 	assertMemory(2, 2, 2);
 	printMemory();
-	void* reg5 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), INT32_MAX, true);
+	void* reg5 = emalloc_memoryblockallocator_get_region(allocator, &main, (int)(pageSize_d * 1.5), true, INT32_MAX);
 	printf("%p\n", reg5);
 	assertMemory(3, 2, 2, 1);
 	printMemory();
