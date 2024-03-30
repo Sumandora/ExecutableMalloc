@@ -44,6 +44,7 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] bool isWritable() const;
 		void setWritable(bool writable);
+		void resize(std::size_t size); // The new size needs to be smaller or equally big as the current region
 	};
 
 	class MemoryMapping {

@@ -18,6 +18,7 @@ uintptr_t emalloc_region_get_to(const void* memoryregion);
 const void* getParent(const void* memoryregion);
 bool emalloc_region_is_writable(const void* memoryregion);
 void emalloc_region_set_writable(void* memoryregion, bool writable);
+void emalloc_region_resize(void* memoryregion, size_t size);
 
 const void* emalloc_mapping_get_parent(const void* memorymapping);
 uintptr_t emalloc_mapping_get_from(const void* memorymapping);

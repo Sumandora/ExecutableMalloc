@@ -31,6 +31,9 @@ void emalloc_region_set_writable(void* memoryregion, bool writable)
 {
 	static_cast<MemoryRegion*>(memoryregion)->setWritable(writable);
 }
+void emalloc_region_resize(void* memoryregion, size_t size) {
+	static_cast<MemoryRegion*>(memoryregion)->resize(size);
+}
 
 const void* emalloc_mapping_get_parent(const void* memorymapping)
 {
