@@ -44,7 +44,7 @@ void emalloc_construct_memoryblockallocator(
 const void* emalloc_memoryblockallocator_mapping_at(const void* memoryblockallocator, size_t index);
 size_t emalloc_memoryblockallocator_mappings_count(const void* memoryblockallocator);
 
-uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance /*= INT32_MAX*/, bool writable /*= true*/);
+uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, bool writable /*= true*/, size_t tolerance /*= INT32_MAX*/);
 void emalloc_memoryblockallocator_delete_region(void* pointer);
 
 void emalloc_memoryblockallocator_cleanup(void* memoryblockallocator);

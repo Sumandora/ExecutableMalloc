@@ -47,7 +47,7 @@ std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, 
 	return { { *best, bestLocation } };
 }
 
-std::unique_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance, bool writable)
+std::unique_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, bool writable, std::size_t tolerance)
 {
 	if(size == 0)
 		throw std::bad_alloc{};

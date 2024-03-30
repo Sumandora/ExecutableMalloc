@@ -102,7 +102,7 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 
-		[[nodiscard]] std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, std::size_t tolerance = INT32_MAX, bool writable = true);
+		[[nodiscard]] std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, bool writable = true, std::size_t tolerance = INT32_MAX);
 	};
 
 }

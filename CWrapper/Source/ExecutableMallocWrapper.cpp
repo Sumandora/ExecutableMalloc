@@ -90,9 +90,9 @@ size_t emalloc_memoryblockallocator_mappings_count(const void* memoryblockalloca
 
 static std::vector<std::unique_ptr<MemoryRegion>> regions;
 
-uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, size_t tolerance, bool writable)
+uintptr_t emalloc_memoryblockallocator_get_region(void* memoryblockallocator, uintptr_t preferredLocation, size_t size, bool writable, size_t tolerance)
 {
-	std::unique_ptr<MemoryRegion> region = static_cast<MemoryBlockAllocator*>(memoryblockallocator)->getRegion(preferredLocation, size, tolerance, writable);
+	std::unique_ptr<MemoryRegion> region = static_cast<MemoryBlockAllocator*>(memoryblockallocator)->getRegion(preferredLocation, size, writable, tolerance);
 	auto& reg = regions.emplace_back(std::move(region));
 	return reg.get()->getFrom();
 }
