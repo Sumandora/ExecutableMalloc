@@ -57,7 +57,8 @@ std::unique_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t pre
 	auto closest = findClosest(preferredLocation, size, tolerance);
 	if (closest.has_value()) {
 		auto& [mapping, regionBegin] = closest.value();
-		mapping.get()->setWritable(writable);
+		if(writable && !mapping.get()->isWritable())
+			mapping.get()->setWritable(writable);
 		return mapping.get()->acquireRegion(regionBegin, size);
 	}
 

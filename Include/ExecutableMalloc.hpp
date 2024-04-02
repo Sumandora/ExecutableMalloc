@@ -103,6 +103,10 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 
+		/**
+		 * Note that when searching for a non-writable memory page, you may get a writable memory page.
+		 * To enforce non-writable memory pages, you may call setWritable yourself.
+		 */
 		[[nodiscard]] std::unique_ptr<MemoryRegion> getRegion(std::uintptr_t preferredLocation, std::size_t size, bool writable = true, std::size_t tolerance = INT32_MAX);
 	};
 
