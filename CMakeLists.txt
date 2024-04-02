@@ -12,6 +12,8 @@ target_include_directories(ExecutableMalloc PUBLIC "${PROJECT_SOURCE_DIR}/Includ
 target_compile_features(ExecutableMalloc PRIVATE cxx_std_20)
 
 if(PROJECT_IS_TOP_LEVEL)
+    add_subdirectory("Extensions/MemoryManagerAllocator") # It's not used, but we want to compile it to check for errors
+
     enable_testing()
     add_subdirectory("Example")
 endif()

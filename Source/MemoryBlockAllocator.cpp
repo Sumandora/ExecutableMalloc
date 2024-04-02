@@ -18,6 +18,8 @@ MemoryBlockAllocator::MemoryBlockAllocator(
 {
 }
 
+MemoryBlockAllocator::~MemoryBlockAllocator() = default;
+
 const std::vector<std::unique_ptr<MemoryMapping>>& MemoryBlockAllocator::getMappings() const
 {
 	return mappings;

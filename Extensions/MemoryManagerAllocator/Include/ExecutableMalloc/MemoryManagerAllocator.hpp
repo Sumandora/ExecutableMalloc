@@ -15,8 +15,11 @@ namespace ExecutableMalloc {
 	}
 
 	class MemoryManagerMemoryBlockAllocator : public MemoryBlockAllocator {
+		const ::MemoryManager::MemoryManager& memoryManager;
 	public:
-		MemoryManagerMemoryBlockAllocator(const ::MemoryManager::MemoryManager& memoryManager);
+		explicit MemoryManagerMemoryBlockAllocator(const ::MemoryManager::MemoryManager& memoryManager);
+
+		[[nodiscard]] const ::MemoryManager::MemoryManager& getMemoryManager() const { return memoryManager; }
 	};
 
 }

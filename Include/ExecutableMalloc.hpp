@@ -99,6 +99,7 @@ namespace ExecutableMalloc {
 		MemoryBlockAllocator() = delete;
 		MemoryBlockAllocator(const MemoryBlockAllocator&) = delete; // Don't copy this around blindly
 		void operator=(const MemoryBlockAllocator&) = delete;
+		virtual ~MemoryBlockAllocator();
 
 		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
 
