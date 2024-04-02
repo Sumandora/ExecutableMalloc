@@ -44,7 +44,7 @@ int main();
 
 void test()
 {
-	const auto pageSize_d = static_cast<double>(posixGetGranularity());
+	const auto pageSize_d = static_cast<double>(Posix::getGranularity());
 	printMemory();
 	auto reg1 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << std::hex << reg1->getFrom() << std::dec << std::endl;
