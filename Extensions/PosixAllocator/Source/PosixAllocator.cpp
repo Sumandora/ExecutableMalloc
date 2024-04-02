@@ -4,14 +4,14 @@
 
 using namespace ExecutableMalloc;
 
-int ExecutableMalloc::posixGetGranularity() {
+int Posix::getGranularity() {
 	static const int pagesize = getpagesize(); // Reduce the sys-calls
 	return pagesize;
 }
 
-std::uintptr_t ExecutableMalloc::posixFindUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)
+std::uintptr_t Posix::findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)
 {
-	int pageSize = posixGetGranularity();
+	int pageSize = getGranularity();
 	// "If another mapping already exists there, the kernel picks a new address that may or may not depend on the hint" - manpage
 	// Some kernels may respect the hint but to be sure that this works, lets do it manually
 	int prot = PROT_READ | PROT_EXEC;
@@ -37,28 +37,26 @@ std::uintptr_t ExecutableMalloc::posixFindUnusedMemory(std::uintptr_t preferredL
 	throw std::bad_alloc{};
 }
 
-void ExecutableMalloc::posixDeallocateMemory(std::uintptr_t location, std::size_t size)
+void Posix::deallocateMemory(std::uintptr_t location, std::size_t size)
 {
 	munmap(reinterpret_cast<void*>(location), size);
 }
 
-void ExecutableMalloc::posixChangePermissions(std::uintptr_t location, std::size_t size, bool writable) {
-	int perms = PROT_READ | PROT_WRITE;
+void Posix::changePermissions(std::uintptr_t location, std::size_t size, bool writable) {
+	int prot = PROT_READ | PROT_EXEC;
+	if(writable)
+		prot |= PROT_WRITE;
 
-	if (writable) {
-		perms |= PROT_EXEC;
-	}
-
-	mprotect(reinterpret_cast<void*>(location), size, perms);
+	mprotect(reinterpret_cast<void*>(location), size, prot);
 }
 
 PosixMemoryBlockAllocator::PosixMemoryBlockAllocator()
 	: MemoryBlockAllocator(
-		  posixFindUnusedMemory,
-		  posixDeallocateMemory,
+		  Posix::findUnusedMemory,
+		  Posix::deallocateMemory,
 		  [](MemoryMapping& mapping, bool newWritable) {
-			  posixChangePermissions(mapping.getFrom(), mapping.getTo() - mapping.getFrom(), newWritable);
+			  Posix::changePermissions(mapping.getFrom(), mapping.getTo() - mapping.getFrom(), newWritable);
 		  },
-		  posixGetGranularity())
+		  Posix::getGranularity())
 {
 }
