@@ -36,11 +36,11 @@ namespace ExecutableMalloc {
 		void operator=(const MemoryRegion&) = delete;
 		~MemoryRegion();
 
-		std::strong_ordering operator<=>(const MemoryRegion& other) const;
+		std::strong_ordering operator<=>(const MemoryRegion& other) const { return from <=> other.from; }
 
-		[[nodiscard]] std::uintptr_t getFrom() const;
-		[[nodiscard]] std::uintptr_t getTo() const;
-		[[nodiscard]] const MemoryMapping* getParent() const;
+		[[nodiscard]] std::uintptr_t getFrom() const { return from; }
+		[[nodiscard]] std::uintptr_t getTo() const { return to; }
+		[[nodiscard]] const MemoryMapping* getParent() const { return parent; }
 
 		[[nodiscard]] bool isWritable() const;
 		void setWritable(bool writable);
@@ -59,7 +59,7 @@ namespace ExecutableMalloc {
 
 		MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, std::uintptr_t to, bool writable);
 
-		std::strong_ordering operator<=>(const MemoryMapping& other) const;
+		std::strong_ordering operator<=>(const MemoryMapping& other) const { return from <=> other.from; }
 		template <bool Reverse>
 		[[nodiscard]] std::optional<std::uintptr_t> findRegion(std::size_t size) const;
 		[[nodiscard]] std::optional<std::pair<std::uintptr_t, std::size_t>> findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const;
@@ -71,11 +71,11 @@ namespace ExecutableMalloc {
 		MemoryMapping(const MemoryMapping&) = delete;
 		void operator=(const MemoryMapping&) = delete;
 
-		[[nodiscard]] const MemoryBlockAllocator* getParent() const;
-		[[nodiscard]] std::uintptr_t getFrom() const;
-		[[nodiscard]] std::uintptr_t getTo() const;
-		[[nodiscard]] const decltype(usedRegions)& getUsedRegions() const;
-		[[nodiscard]] bool isWritable() const;
+		[[nodiscard]] const MemoryBlockAllocator* getParent() const { return parent; }
+		[[nodiscard]] std::uintptr_t getFrom() const { return from; }
+		[[nodiscard]] std::uintptr_t getTo() const { return to; }
+		[[nodiscard]] const auto& getUsedRegions() const { return usedRegions; }
+		[[nodiscard]] bool isWritable() const { return writable; }
 	};
 
 	class MemoryBlockAllocator {
@@ -101,7 +101,7 @@ namespace ExecutableMalloc {
 		void operator=(const MemoryBlockAllocator&) = delete;
 		virtual ~MemoryBlockAllocator();
 
-		[[nodiscard]] const std::vector<std::unique_ptr<MemoryMapping>>& getMappings() const;
+		[[nodiscard]] const auto& getMappings() const { return mappings; }
 
 		/**
 		 * Note that when searching for a non-writable memory page, you may get a writable memory page.

@@ -20,11 +20,6 @@ MemoryBlockAllocator::MemoryBlockAllocator(
 
 MemoryBlockAllocator::~MemoryBlockAllocator() = default;
 
-const std::vector<std::unique_ptr<MemoryMapping>>& MemoryBlockAllocator::getMappings() const
-{
-	return mappings;
-}
-
 std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, std::uintptr_t>> MemoryBlockAllocator::findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance)
 {
 	std::unique_ptr<MemoryMapping>* best = nullptr;

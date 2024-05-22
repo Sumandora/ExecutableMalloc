@@ -12,36 +12,6 @@ MemoryMapping::MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, 
 {
 }
 
-const MemoryBlockAllocator* MemoryMapping::getParent() const
-{
-	return parent;
-}
-
-std::uintptr_t MemoryMapping::getFrom() const
-{
-	return from;
-}
-
-std::uintptr_t MemoryMapping::getTo() const
-{
-	return to;
-}
-
-const decltype(MemoryMapping::usedRegions)& MemoryMapping::getUsedRegions() const
-{
-	return usedRegions;
-}
-
-bool MemoryMapping::isWritable() const
-{
-	return writable;
-}
-
-std::strong_ordering MemoryMapping::operator<=>(const MemoryMapping& other) const
-{
-	return from <=> other.from;
-}
-
 template <bool Reverse>
 std::optional<std::uintptr_t> MemoryMapping::findRegion(std::size_t size) const {
 	std::uintptr_t p = Reverse ? to : from;
