@@ -12,7 +12,7 @@ include("FetchContent")
 FetchContent_Declare(MemoryManager
         GIT_REPOSITORY https://github.com/Sumandora/MemoryManager
         GIT_PROGRESS TRUE
-        GIT_TAG 1.0)
+        GIT_TAG 1.1)
 FetchContent_MakeAvailable(MemoryManager)
 
 target_link_libraries(ExecutableMallocMemoryManagerAllocator ExecutableMalloc MemoryManager)

@@ -1,8 +1,8 @@
 #include "ExecutableMalloc/PosixAllocator.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <iostream>
-#include <cassert>
 
 using namespace ExecutableMalloc;
 
@@ -31,10 +31,11 @@ void printMemory()
 	std::cout << "- Memory dump end" << std::endl;
 }
 
-void assertMemory(std::initializer_list<std::size_t> regions) {
+void assertMemory(std::initializer_list<std::size_t> regions)
+{
 	assert(allocator.getMappings().size() == regions.size());
 	auto regsize = regions.begin();
-	for(std::size_t i = 0; i < regions.size(); i++) {
+	for (std::size_t i = 0; i < regions.size(); i++) {
 		assert(allocator.getMappings()[i]->getUsedRegions().size() == *regsize);
 		regsize++;
 	}

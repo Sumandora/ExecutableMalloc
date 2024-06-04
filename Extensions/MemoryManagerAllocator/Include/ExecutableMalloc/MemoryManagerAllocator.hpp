@@ -1,8 +1,8 @@
 #ifndef EXECUTABLEMALLOC_MEMORYMANAGERALLOCATOR_HPP
 #define EXECUTABLEMALLOC_MEMORYMANAGERALLOCATOR_HPP
 
-#include "MemoryManager/MemoryManager.hpp"
 #include "ExecutableMalloc.hpp"
+#include "MemoryManager/MemoryManager.hpp"
 
 namespace ExecutableMalloc {
 
@@ -16,6 +16,7 @@ namespace ExecutableMalloc {
 
 	class MemoryManagerMemoryBlockAllocator : public MemoryBlockAllocator {
 		const ::MemoryManager::MemoryManager& memoryManager;
+
 	public:
 		explicit MemoryManagerMemoryBlockAllocator(const ::MemoryManager::MemoryManager& memoryManager);
 

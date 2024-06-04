@@ -13,16 +13,17 @@ MemoryMapping::MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, 
 }
 
 template <bool Reverse>
-std::optional<std::uintptr_t> MemoryMapping::findRegion(std::size_t size) const {
+std::optional<std::uintptr_t> MemoryMapping::findRegion(std::size_t size) const
+{
 	std::uintptr_t p = Reverse ? to : from;
 	auto begin = [this] {
-		if constexpr(Reverse)
+		if constexpr (Reverse)
 			return usedRegions.rbegin();
 		else
 			return usedRegions.begin();
 	}();
 	auto end = [this] {
-		if constexpr(Reverse)
+		if constexpr (Reverse)
 			return usedRegions.rend();
 		else
 			return usedRegions.end();
@@ -46,12 +47,13 @@ constexpr inline std::size_t dist(std::size_t a, std::size_t b)
 	return std::max(a, b) - std::min(a, b);
 }
 
-std::optional<std::pair<std::uintptr_t, std::size_t>> MemoryMapping::findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const {
-	if(dist(from, location) > tolerance || dist(to, location) > tolerance)
+std::optional<std::pair<std::uintptr_t, std::size_t>> MemoryMapping::findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const
+{
+	if (dist(from, location) > tolerance || dist(to, location) > tolerance)
 		return std::nullopt;
-	for(bool reverse : { false, true }) {
+	for (bool reverse : { false, true }) {
 		auto region = reverse ? findRegion<true>(size) : findRegion<false>(size); // This is so incredibly stupid
-		if(!region.has_value())
+		if (!region.has_value())
 			continue;
 		std::size_t distance = dist(region.value(), location);
 		if (distance > tolerance || dist(region.value() + size, location) > tolerance)
@@ -72,7 +74,7 @@ void MemoryMapping::setWritable(bool newWritable)
 
 std::unique_ptr<MemoryRegion> MemoryMapping::acquireRegion(std::uintptr_t location, std::size_t size)
 {
-	if(location < from || location+size > to)
+	if (location < from || location + size > to)
 		throw std::bad_alloc{};
 	auto region = std::unique_ptr<MemoryRegion>{ new MemoryRegion{ location, location + size, this } };
 	usedRegions.insert(region.get());

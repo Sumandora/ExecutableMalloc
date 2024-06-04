@@ -26,14 +26,14 @@ std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, 
 	std::uintptr_t bestLocation;
 	std::uintptr_t bestDistance = tolerance;
 
-	for(auto& mapping : mappings) {
-		if(mapping->to - mapping->from < size)
+	for (auto& mapping : mappings) {
+		if (mapping->to - mapping->from < size)
 			continue;
 		auto region = mapping->findRegionInTolerance(location, size, tolerance);
-		if(!region.has_value())
+		if (!region.has_value())
 			continue;
 		auto [regionBegin, distance] = region.value();
-		if(distance < bestDistance) {
+		if (distance < bestDistance) {
 			best = &mapping;
 			bestLocation = regionBegin;
 			bestDistance = distance;
@@ -46,13 +46,13 @@ std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, 
 
 std::unique_ptr<MemoryRegion> MemoryBlockAllocator::getRegion(std::uintptr_t preferredLocation, std::size_t size, bool writable, std::size_t tolerance)
 {
-	if(size == 0)
+	if (size == 0)
 		throw std::bad_alloc{};
 
 	auto closest = findClosest(preferredLocation, size, tolerance);
 	if (closest.has_value()) {
 		auto& [mapping, regionBegin] = closest.value();
-		if(writable && !mapping.get()->isWritable())
+		if (writable && !mapping.get()->isWritable())
 			mapping.get()->setWritable(writable);
 		return mapping.get()->acquireRegion(regionBegin, size);
 	}
@@ -72,7 +72,7 @@ void MemoryBlockAllocator::gc(MemoryMapping* page)
 {
 	std::erase_if(mappings, [&](const std::unique_ptr<MemoryMapping>& other) {
 		bool found = other.get() == page;
-		if(found)
+		if (found)
 			deallocateMemory(page->from, page->to - page->from);
 		return found;
 	});

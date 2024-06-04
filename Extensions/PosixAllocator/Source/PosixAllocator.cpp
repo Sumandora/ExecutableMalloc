@@ -4,7 +4,8 @@
 
 using namespace ExecutableMalloc;
 
-int Posix::getGranularity() {
+int Posix::getGranularity()
+{
 	static const int pagesize = getpagesize(); // Reduce the sys-calls
 	return pagesize;
 }
@@ -15,12 +16,12 @@ std::uintptr_t Posix::findUnusedMemory(std::uintptr_t preferredLocation, std::si
 	// "If another mapping already exists there, the kernel picks a new address that may or may not depend on the hint" - manpage
 	// Some kernels may respect the hint but to be sure that this works, lets do it manually
 	int prot = PROT_READ | PROT_EXEC;
-	if(writable)
+	if (writable)
 		prot |= PROT_WRITE;
 	for (std::size_t offset = 0; offset < tolerance; offset += pageSize)
-		for (bool positive : {false, true}) {
+		for (bool positive : { false, true }) {
 			std::uintptr_t address = preferredLocation - preferredLocation % pageSize;
-			if(positive)
+			if (positive)
 				address += offset;
 			else
 				address -= offset;
@@ -42,9 +43,10 @@ void Posix::deallocateMemory(std::uintptr_t location, std::size_t size)
 	munmap(reinterpret_cast<void*>(location), size);
 }
 
-void Posix::changePermissions(std::uintptr_t location, std::size_t size, bool writable) {
+void Posix::changePermissions(std::uintptr_t location, std::size_t size, bool writable)
+{
 	int prot = PROT_READ | PROT_EXEC;
-	if(writable)
+	if (writable)
 		prot |= PROT_WRITE;
 
 	mprotect(reinterpret_cast<void*>(location), size, prot);

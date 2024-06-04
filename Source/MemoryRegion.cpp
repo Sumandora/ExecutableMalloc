@@ -24,8 +24,9 @@ void MemoryRegion::setWritable(bool writable)
 	parent->setWritable(writable);
 }
 
-void MemoryRegion::resize(std::size_t size) {
-	if(size > to - from)
+void MemoryRegion::resize(std::size_t size)
+{
+	if (size > to - from)
 		throw std::exception{}; // It needs to be smaller
 
 	to = from + size;

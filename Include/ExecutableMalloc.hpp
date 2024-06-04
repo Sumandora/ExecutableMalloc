@@ -1,14 +1,14 @@
 #ifndef EXECUTABLEMALLOC_HPP
 #define EXECUTABLEMALLOC_HPP
 
-#include <cstdint>
-#include <memory>
-#include <set>
-#include <vector>
-#include <utility>
 #include <compare>
-#include <optional>
+#include <cstdint>
 #include <functional>
+#include <memory>
+#include <optional>
+#include <set>
+#include <utility>
+#include <vector>
 
 namespace ExecutableMalloc {
 	class MemoryBlockAllocator;
@@ -66,6 +66,7 @@ namespace ExecutableMalloc {
 		void setWritable(bool newWritable);
 		[[nodiscard]] std::unique_ptr<MemoryRegion> acquireRegion(std::uintptr_t location, std::size_t size);
 		void gc(MemoryRegion* region);
+
 	public:
 		MemoryMapping() = delete;
 		MemoryMapping(const MemoryMapping&) = delete;
@@ -89,13 +90,13 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, std::uintptr_t>> findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance);
 		void gc(MemoryMapping* page);
+
 	public:
 		MemoryBlockAllocator(
 			decltype(findUnusedMemory)&& findUnusedMemory,
 			decltype(deallocateMemory)&& deallocateMemory,
 			decltype(changePermissions)&& changePermissions,
-			std::size_t granularity
-		);
+			std::size_t granularity);
 		MemoryBlockAllocator() = delete;
 		MemoryBlockAllocator(const MemoryBlockAllocator&) = delete; // Don't copy this around blindly
 		void operator=(const MemoryBlockAllocator&) = delete;
