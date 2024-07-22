@@ -18,7 +18,7 @@ std::uintptr_t ExecutableMalloc::MemoryManager::findUnusedMemory(const ::MemoryM
 				std::uintptr_t pointer = memoryManager.allocate(address, pageSize * numPages, { true, writable, true });
 				return pointer;
 			} catch (std::runtime_error& err) {
-				// Allocation failed;
+				// Allocation failed
 				continue;
 			}
 		}

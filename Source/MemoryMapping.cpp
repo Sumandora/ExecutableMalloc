@@ -76,9 +76,9 @@ std::unique_ptr<MemoryRegion> MemoryMapping::acquireRegion(std::uintptr_t locati
 {
 	if (location < from || location + size > to)
 		throw std::bad_alloc{};
-	auto region = std::unique_ptr<MemoryRegion>{ new MemoryRegion{ location, location + size, this } };
-	usedRegions.insert(region.get());
-	return region;
+	auto* regionPtr = new MemoryRegion{ location, location + size, this };
+	usedRegions.insert(regionPtr);
+	return std::unique_ptr<MemoryRegion>{ regionPtr };
 }
 
 void MemoryMapping::gc(MemoryRegion* region)

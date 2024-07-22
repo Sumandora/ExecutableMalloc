@@ -54,18 +54,20 @@ namespace ExecutableMalloc {
 		std::set<MemoryRegion*, MemoryRegion::PtrOrder> usedRegions;
 		bool writable;
 
+		template <bool Reverse>
+		[[nodiscard]] std::optional<std::uintptr_t> findRegion(std::size_t size) const;
+
 		friend MemoryRegion;
-		friend MemoryBlockAllocator;
 
 		MemoryMapping(MemoryBlockAllocator* parent, std::uintptr_t from, std::uintptr_t to, bool writable);
 
 		std::strong_ordering operator<=>(const MemoryMapping& other) const { return from <=> other.from; }
-		template <bool Reverse>
-		[[nodiscard]] std::optional<std::uintptr_t> findRegion(std::size_t size) const;
-		[[nodiscard]] std::optional<std::pair<std::uintptr_t, std::size_t>> findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const;
 		void setWritable(bool newWritable);
-		[[nodiscard]] std::unique_ptr<MemoryRegion> acquireRegion(std::uintptr_t location, std::size_t size);
 		void gc(MemoryRegion* region);
+
+		friend MemoryBlockAllocator;
+		[[nodiscard]] std::optional<std::pair<std::uintptr_t, std::size_t>> findRegionInTolerance(std::uintptr_t location, std::size_t size, std::size_t tolerance) const;
+		[[nodiscard]] std::unique_ptr<MemoryRegion> acquireRegion(std::uintptr_t location, std::size_t size);
 
 	public:
 		MemoryMapping() = delete;
@@ -88,7 +90,7 @@ namespace ExecutableMalloc {
 
 		friend MemoryMapping;
 
-		[[nodiscard]] std::optional<std::pair<std::reference_wrapper<std::unique_ptr<MemoryMapping>>, std::uintptr_t>> findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance);
+		[[nodiscard]] std::pair<decltype(mappings)::iterator, std::uintptr_t> findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance);
 		void gc(MemoryMapping* page);
 
 	public:
