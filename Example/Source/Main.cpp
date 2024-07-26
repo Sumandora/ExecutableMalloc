@@ -1,4 +1,5 @@
 #include "ExecutableMalloc/PosixAllocator.hpp"
+#include "ExecutableMalloc/MemoryManagerAllocator.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -11,24 +12,24 @@ PosixMemoryBlockAllocator allocator;
 void printMemory()
 {
 	std::size_t i = 0;
-	std::cout << "- Memory dump start" << std::endl;
-	for (const std::unique_ptr<MemoryMapping>& block : allocator.getMappings()) {
-		std::cout << "------- Mapping #" << i << std::endl;
-		std::cout << "From: " << std::hex << block->getFrom() << std::dec << std::endl;
-		std::cout << "To: " << std::hex << block->getTo() << std::dec << std::endl;
-		std::cout << "Writable: " << std::boolalpha << block->isWritable() << std::noboolalpha << std::endl;
-		std::cout << "-- Regions dump start" << std::endl;
+	auto& mappings = allocator.getMappings();
+	std::cout << "Mappings: " << mappings.size() << std::endl;
+	for (const std::unique_ptr<MemoryMapping>& block : mappings) {
+		std::cout << "Mapping #" << i << std::endl;
+		std::cout << "\tFrom: " << std::hex << block->getFrom() << std::dec << std::endl;
+		std::cout << "\tTo: " << std::hex << block->getTo() << std::dec << std::endl;
+		std::cout << "\tWritable: " << std::boolalpha << block->isWritable() << std::noboolalpha << std::endl;
+		auto& usedRegions = block->getUsedRegions();
+		std::cout << "\tRegions: " << usedRegions.size() << std::endl;
 		std::size_t j = 0;
-		for (const MemoryRegion* region : block->getUsedRegions()) {
-			std::cout << "------- Region #" << j << std::endl;
-			std::cout << "From: " << std::hex << region->getFrom() << std::dec << std::endl;
-			std::cout << "To: " << std::hex << region->getTo() << std::dec << std::endl;
+		for (const MemoryRegion* region : usedRegions) {
+			std::cout << "\t\tRegion #" << j << std::endl;
+			std::cout << "\t\t\tFrom: " << std::hex << region->getFrom() << std::dec << std::endl;
+			std::cout << "\t\t\tTo: " << std::hex << region->getTo() << std::dec << std::endl;
 			j++;
 		}
-		std::cout << "-- Regions dump end" << std::endl;
 		i++;
 	}
-	std::cout << "- Memory dump end" << std::endl;
 }
 
 void assertMemory(std::initializer_list<std::size_t> regions)
@@ -45,7 +46,7 @@ int main();
 
 void test()
 {
-	const auto pageSize_d = static_cast<double>(Posix::getGranularity());
+	const auto pageSize_d = static_cast<double>(allocator.getGranularity());
 	printMemory();
 	auto reg1 = allocator.getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
 	std::cout << std::hex << reg1->getFrom() << std::dec << std::endl;
