@@ -7,11 +7,11 @@
 namespace ExecutableMalloc {
 
 	template<typename MemMgr> requires MemoryManager::Allocator<MemMgr> && MemoryManager::Deallocator<MemMgr> && MemoryManager::Protector<MemMgr>
-	class MemoryManagerMemoryBlockAllocator : public MemoryBlockAllocator {
+	class MemoryManagerAllocator : public MemoryBlockAllocator {
 		const MemMgr& memoryManager;
 
 	public:
-		explicit MemoryManagerMemoryBlockAllocator(const MemMgr& memoryManager)
+		explicit MemoryManagerAllocator(const MemMgr& memoryManager)
 			: MemoryBlockAllocator(
 				  search(memoryManager.getPageGranularity(), [&memoryManager](std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& pointer) {
 					  try {

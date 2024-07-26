@@ -21,8 +21,8 @@ target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMalloc)
 If you are on a system that is posix-compliant, then you can also use the PosixAllocator extension.
 
 ```cmake
-add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/Extensions/PosixAllocator")
-target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocPosixAllocator)
+add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/Modules/PosixAllocator")
+target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocPosix)
 ```
 
 If your system is not posix-compliant, then you may take a look at the PosixAllocator extension for some guidance to
@@ -41,22 +41,25 @@ MemoryBlockAllocator allocator{
 	[](std::uintptr_t location, std::size_t size) {
 		// TODO Deallocate the memory pages
 	},
+	[](std::uintptr_t location, std::size_t size, bool writable) {
+		// TODO Change protection to writable
+	},
 	PAGE_SIZE
 };
 ```
 
-or use the PosixMemoryBlockAllocator if you are using the posix extension:
+or use the PosixAllocator if you are using the posix extension:
 
 ```c++
 #include "ExecutableMalloc/PosixAllocator.hpp"
-PosixMemoryBlockAllocator allocator;
+ExecutableMalloc::PosixAllocator allocator;
 ```
 
 You can now use the `getRegion` member function to receive your allocated memory block:
 
 ```c++
 // 'tolerance' and 'writable' are optional parameters
-auto region = allocator.getRegion(location, size, /*tolerance =*/ INT32_MAX, /*writable =*/ true);
+auto region = allocator.getRegion(location, size, /*writable =*/ true, /*tolerance =*/ INT32_MAX);
 ```
 
 The region will be deallocated when `region` goes out of scope.

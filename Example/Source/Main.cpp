@@ -5,9 +5,9 @@
 #include <cstdint>
 #include <iostream>
 
-using namespace ExecutableMalloc;
+ExecutableMalloc::PosixAllocator allocator;
 
-PosixMemoryBlockAllocator allocator;
+using namespace ExecutableMalloc;
 
 void printMemory()
 {

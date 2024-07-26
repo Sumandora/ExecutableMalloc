@@ -156,7 +156,7 @@ namespace ExecutableMalloc {
 		std::vector<std::unique_ptr<MemoryMapping>> mappings;
 		std::function<std::uintptr_t(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)> findUnusedMemory;
 		std::function<void(std::uintptr_t location, std::size_t size)> deallocateMemory;
-		std::function<void(std::uintptr_t location, std::size_t size, bool newWritable)> changePermissions;
+		std::function<void(std::uintptr_t location, std::size_t size, bool newWritable)> changeProtection;
 		std::size_t granularity; // (Page size); The functions declared above are expected to also respect this granularity
 
 		friend MemoryMapping;
@@ -232,11 +232,11 @@ namespace ExecutableMalloc {
 		MemoryBlockAllocator(
 			decltype(findUnusedMemory)&& findUnusedMemory,
 			decltype(deallocateMemory)&& deallocateMemory,
-			decltype(changePermissions)&& changePermissions,
+			decltype(changeProtection)&& changePermissions,
 			std::size_t granularity)
 			: findUnusedMemory(std::move(findUnusedMemory))
 			, deallocateMemory(std::move(deallocateMemory))
-			, changePermissions(std::move(changePermissions))
+			, changeProtection(std::move(changePermissions))
 			, granularity(granularity)
 		{
 		}
@@ -305,7 +305,7 @@ namespace ExecutableMalloc {
 		if (this->writable == newWritable)
 			return;
 
-		parent->changePermissions(from, to - from, newWritable);
+		parent->changeProtection(from, to - from, newWritable);
 		this->writable = newWritable;
 	}
 	inline void MemoryMapping::gc(MemoryRegion* region)

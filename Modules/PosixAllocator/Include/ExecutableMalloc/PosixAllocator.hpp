@@ -7,7 +7,7 @@
 
 namespace ExecutableMalloc {
 
-	class PosixMemoryBlockAllocator : public MemoryBlockAllocator {
+	class PosixAllocator : public MemoryBlockAllocator {
 		static int getPageSize()
 		{
 			static const int pagesize = getpagesize(); // Reduce the sys-calls
@@ -22,7 +22,7 @@ namespace ExecutableMalloc {
 		}
 
 	public:
-		PosixMemoryBlockAllocator()
+		PosixAllocator()
 			: MemoryBlockAllocator(
 				  search(getPageSize(), [](std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& pointer) {
 					  void* ptr = mmap(
