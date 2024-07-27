@@ -152,6 +152,11 @@ namespace ExecutableMalloc {
 		[[nodiscard]] bool isWritable() const { return writable; }
 	};
 
+	template<typename Func>
+	concept AllocatorFunc = requires(const Func& f, std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& result) {
+		{ f(address, length, writable, result) } -> std::convertible_to<bool>;
+	};
+
 	class MemoryBlockAllocator {
 		std::vector<std::unique_ptr<MemoryMapping>> mappings;
 		std::function<std::uintptr_t(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)> findUnusedMemory;
@@ -210,7 +215,8 @@ namespace ExecutableMalloc {
 		}
 
 	protected:
-		static auto search(std::size_t granularity, const std::function<bool(std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t&)>& func)
+		template<typename Func> requires AllocatorFunc<Func>
+		static auto search(std::size_t granularity, const Func& func)
 		{
 			return [func, granularity](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
 				for (std::size_t offset = 0; offset < tolerance; offset += granularity)
