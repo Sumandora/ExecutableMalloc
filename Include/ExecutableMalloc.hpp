@@ -206,10 +206,10 @@ namespace ExecutableMalloc {
 			bool writable = true,
 			std::size_t tolerance = INT32_MAX)
 		{
-			auto effectiveSize = std::size_t(std::ceil(float(size) / float(granularity))) * granularity;
-			std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, effectiveSize, writable);
+			const std::size_t numPages = std::ceil(static_cast<float>(size) / static_cast<float>(granularity));
+			std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
 			auto& newRegion = mappings.emplace_back(
-				new MemoryMapping{ this, newMem, newMem + effectiveSize, writable }
+				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable }
  			);
 			return newRegion;
 		}
