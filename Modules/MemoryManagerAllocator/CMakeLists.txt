@@ -12,7 +12,7 @@ if (NOT TARGET MemoryManager)
     FetchContent_Declare(MemoryManager
             GIT_REPOSITORY https://github.com/Sumandora/MemoryManager
             GIT_PROGRESS TRUE
-            GIT_TAG 2.1)
+            GIT_TAG 2.1.2)
     FetchContent_MakeAvailable(MemoryManager)
 endif ()
 

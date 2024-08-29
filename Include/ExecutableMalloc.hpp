@@ -1,11 +1,15 @@
 #ifndef EXECUTABLEMALLOC_HPP
 #define EXECUTABLEMALLOC_HPP
 
-#include <cmath>
+#include <algorithm>
 #include <compare>
+#include <concepts>
+#include <cstddef>
 #include <cstdint>
+#include <exception>
 #include <functional>
 #include <memory>
+#include <new>
 #include <optional>
 #include <ranges>
 #include <set>
@@ -169,7 +173,7 @@ namespace ExecutableMalloc {
 		std::pair<decltype(mappings)::iterator, std::uintptr_t> findClosest(std::uintptr_t location, std::size_t size, std::size_t tolerance)
 		{
 			auto best = mappings.end();
-			std::uintptr_t bestLocation;
+			std::uintptr_t bestLocation = 0;
 			std::uintptr_t bestDistance = tolerance;
 
 			for (auto it = mappings.begin(); it != mappings.end(); it++) {
@@ -206,8 +210,10 @@ namespace ExecutableMalloc {
 			bool writable = true,
 			std::size_t tolerance = INT32_MAX)
 		{
-			const std::size_t numPages = std::ceil(static_cast<float>(size) / static_cast<float>(granularity));
-			std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
+			// round up integer division
+			const size_t numPages = (size + granularity - 1) / granularity;
+
+			const std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
 			auto& newRegion = mappings.emplace_back(
 				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable }
  			);
@@ -226,7 +232,7 @@ namespace ExecutableMalloc {
 							address += offset;
 						else
 							address -= offset;
-						std::uintptr_t pointer;
+						std::uintptr_t pointer = 0;
 						if (func(address, granularity * numPages, writable, pointer))
 							return pointer;
 					}

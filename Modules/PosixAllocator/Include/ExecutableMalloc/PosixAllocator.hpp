@@ -3,7 +3,10 @@
 
 #include "ExecutableMalloc.hpp"
 
+#include <cstddef>
+#include <cstdint>
 #include <sys/mman.h>
+#include <unistd.h>
 
 namespace ExecutableMalloc {
 

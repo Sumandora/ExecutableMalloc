@@ -3,6 +3,9 @@
 
 #include "ExecutableMalloc.hpp"
 #include "MemoryManager/MemoryManager.hpp"
+#include <cstddef>
+#include <cstdint>
+#include <stdexcept>
 
 namespace ExecutableMalloc {
 
