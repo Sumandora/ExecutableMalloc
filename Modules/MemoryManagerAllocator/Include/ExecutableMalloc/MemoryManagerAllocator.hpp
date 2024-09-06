@@ -3,6 +3,7 @@
 
 #include "ExecutableMalloc.hpp"
 #include "MemoryManager/MemoryManager.hpp"
+
 #include <cstddef>
 #include <cstdint>
 #include <stdexcept>
@@ -11,7 +12,7 @@ namespace ExecutableMalloc {
 
 	template<typename MemMgr> requires MemoryManager::Allocator<MemMgr> && MemoryManager::Deallocator<MemMgr> && MemoryManager::Protector<MemMgr>
 	class MemoryManagerAllocator : public MemoryBlockAllocator {
-		const MemMgr& memoryManager;
+		const MemMgr* memoryManager;
 
 	public:
 		explicit MemoryManagerAllocator(const MemMgr& memoryManager)
@@ -32,11 +33,11 @@ namespace ExecutableMalloc {
 					  memoryManager.protect(location, size, { true, newWritable, true });
 				  },
 				  memoryManager.getPageGranularity())
-			, memoryManager(memoryManager)
+			, memoryManager(&memoryManager)
 		{
 		}
 
-		[[nodiscard]] const MemMgr& getMemoryManager() const { return memoryManager; }
+		[[nodiscard]] const MemMgr* getMemoryManager() const { return memoryManager; }
 	};
 
 }
