@@ -18,14 +18,14 @@ using namespace ExecutableMalloc;
 void printMemory()
 {
 	std::size_t i = 0;
-	auto& mappings = allocator->getMappings();
+	const auto& mappings = allocator->getMappings();
 	std::cout << "Mappings: " << mappings.size() << '\n';
 	for (const std::unique_ptr<MemoryMapping>& block : mappings) {
 		std::cout << "Mapping #" << i << '\n';
 		std::cout << "\tFrom: " << std::hex << block->getFrom() << std::dec << '\n';
 		std::cout << "\tTo: " << std::hex << block->getTo() << std::dec << '\n';
 		std::cout << "\tWritable: " << std::boolalpha << block->isWritable() << std::noboolalpha << '\n';
-		auto& usedRegions = block->getUsedRegions();
+		const auto& usedRegions = block->getUsedRegions();
 		std::cout << "\tRegions: " << usedRegions.size() << '\n';
 		std::size_t j = 0;
 		for (const MemoryRegion* region : usedRegions) {
@@ -55,23 +55,23 @@ void test()
 	const auto pageSize_d = static_cast<double>(allocator->getGranularity());
 	printMemory();
 	auto reg1 = allocator->getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
-	std::cout << std::hex << reg1->getFrom() << std::dec << '\n';
+	std::cout << "Allocated at: " << std::hex << reg1->getFrom() << std::dec << '\n';
 	printMemory();
 	assertMemory({ 1 });
 	auto reg2 = allocator->getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 0.33));
-	std::cout << std::hex << reg2->getFrom() << std::dec << '\n';
+	std::cout << "Allocated at: " << std::hex << reg2->getFrom() << std::dec << '\n';
 	printMemory();
 	assertMemory({ 2 });
 	auto reg3 = allocator->getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
-	std::cout << std::hex << reg3->getFrom() << std::dec << '\n';
+	std::cout << "Allocated at: " << std::hex << reg3->getFrom() << std::dec << '\n';
 	printMemory();
 	assertMemory({ 2, 1 });
 	auto reg4 = allocator->getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 0.33));
-	std::cout << std::hex << reg4->getFrom() << std::dec << '\n';
+	std::cout << "Allocated at: " << std::hex << reg4->getFrom() << std::dec << '\n';
 	printMemory();
 	assertMemory({ 2, 2 });
 	auto reg5 = allocator->getRegion(reinterpret_cast<std::uintptr_t>(&main), static_cast<int>(pageSize_d * 1.5));
-	std::cout << std::hex << reg5->getFrom() << std::dec << '\n';
+	std::cout << "Allocated at: " << std::hex << reg5->getFrom() << std::dec << '\n';
 	printMemory();
 	assertMemory({ 2, 2, 1 });
 }

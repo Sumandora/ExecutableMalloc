@@ -10,7 +10,8 @@
 
 namespace ExecutableMalloc {
 
-	template<typename MemMgr> requires MemoryManager::Allocator<MemMgr> && MemoryManager::Deallocator<MemMgr> && MemoryManager::Protector<MemMgr>
+	template <typename MemMgr>
+		requires MemoryManager::Allocator<MemMgr> && MemoryManager::Deallocator<MemMgr> && MemoryManager::Protector<MemMgr>
 	class MemoryManagerAllocator : public MemoryBlockAllocator {
 		const MemMgr* memoryManager;
 

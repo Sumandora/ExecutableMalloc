@@ -17,7 +17,8 @@ namespace ExecutableMalloc {
 			return pagesize;
 		}
 
-		static int getFlags(bool writable) {
+		static constexpr int getFlags(bool writable)
+		{
 			int prot = PROT_READ | PROT_EXEC;
 			if (writable)
 				prot |= PROT_WRITE;
@@ -35,7 +36,7 @@ namespace ExecutableMalloc {
 						  MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
 						  -1,
 						  0);
-					  if(ptr != MAP_FAILED) {
+					  if (ptr != MAP_FAILED) {
 						  pointer = reinterpret_cast<std::uintptr_t>(ptr);
 						  return true;
 					  }

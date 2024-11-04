@@ -113,10 +113,11 @@ namespace ExecutableMalloc {
 
 		friend MemoryBlockAllocator;
 
-		static constexpr inline size_t dist(std::size_t a, std::size_t b)
+		static constexpr size_t dist(std::size_t a, std::size_t b)
 		{
 			return std::max(a, b) - std::min(a, b);
 		}
+
 		[[nodiscard]] std::optional<std::pair<std::uintptr_t, std::size_t>> findRegionInTolerance(
 			std::uintptr_t location,
 			std::size_t size,
@@ -135,6 +136,7 @@ namespace ExecutableMalloc {
 			}
 			return std::nullopt;
 		}
+
 		[[nodiscard]] std::unique_ptr<MemoryRegion> acquireRegion(std::uintptr_t location, std::size_t size)
 		{
 			if (location < from || location + size > to)
@@ -156,7 +158,7 @@ namespace ExecutableMalloc {
 		[[nodiscard]] bool isWritable() const { return writable; }
 	};
 
-	template<typename Func>
+	template <typename Func>
 	concept AllocatorFunc = requires(const Func& f, std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& result) {
 		{ f(address, length, writable, result) } -> std::convertible_to<bool>;
 	};
@@ -192,6 +194,7 @@ namespace ExecutableMalloc {
 			}
 			return { best, bestLocation };
 		}
+
 		void gc(MemoryMapping* page)
 		{
 			auto it = std::ranges::find_if(mappings,
@@ -215,13 +218,13 @@ namespace ExecutableMalloc {
 
 			const std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
 			auto& newRegion = mappings.emplace_back(
-				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable }
- 			);
+				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable });
 			return newRegion;
 		}
 
 	protected:
-		template<typename Func> requires AllocatorFunc<Func>
+		template <typename Func>
+			requires AllocatorFunc<Func>
 		static auto search(std::size_t granularity, const Func& func)
 		{
 			return [func, granularity](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
@@ -259,17 +262,11 @@ namespace ExecutableMalloc {
 
 		[[nodiscard]] const auto& getMappings() const { return mappings; }
 
-		/**
-		 * @note: When searching for a non-writable memory page, you may get a writable memory page.
-		 * To enforce non-writable memory pages, you may call setWritable yourself after receiving it.
-		 *
-		 * This is done, because while writable memory regions fulfill all traits of a non-writable region,
-		 * a non-writable region causes segmentation faults when written to.
-		 */
 		[[nodiscard]] std::unique_ptr<MemoryRegion> getRegion(
 			std::uintptr_t preferredLocation,
 			std::size_t size,
-			bool writable = true,
+			// @note: When set to false, writable pages are still returned, call MemoryMapping#setWritable(false) when a unreadable page is desired
+			bool needsWritable = true,
 			std::size_t tolerance = INT32_MAX)
 		{
 			if (size == 0)
@@ -278,13 +275,13 @@ namespace ExecutableMalloc {
 			auto [iter, regionBegin] = findClosest(preferredLocation, size, tolerance);
 			if (iter != mappings.end()) {
 				auto& mapping = *iter;
-				if (writable && !mapping->isWritable())
-					mapping->setWritable(writable);
+				if (needsWritable && !mapping->isWritable())
+					mapping->setWritable(needsWritable);
 				return mapping->acquireRegion(regionBegin, size);
 			}
 
 			// Mhm, I guess we are out of luck, we need to allocate new memory
-			std::unique_ptr<MemoryMapping>& newRegion = allocateNewMap(preferredLocation, size, writable, tolerance);
+			std::unique_ptr<MemoryMapping>& newRegion = allocateNewMap(preferredLocation, size, needsWritable, tolerance);
 
 			auto regionBounds = newRegion->findRegionInTolerance(preferredLocation, size, tolerance);
 			if (!regionBounds.has_value()) // If this optional happens to be empty then findUnusedMemory didn't give a page inside the tolerance
@@ -293,7 +290,8 @@ namespace ExecutableMalloc {
 			return newRegion->acquireRegion(regionBounds->first, size);
 		}
 
-		[[nodiscard]] std::size_t getGranularity() const {
+		[[nodiscard]] std::size_t getGranularity() const
+		{
 			return granularity;
 		}
 	};
@@ -303,10 +301,12 @@ namespace ExecutableMalloc {
 	{
 		parent->gc(this);
 	}
+
 	inline bool MemoryRegion::isWritable() const
 	{
 		return parent->isWritable();
 	}
+
 	inline void MemoryRegion::setWritable(bool writable)
 	{
 		parent->setWritable(writable);
@@ -320,6 +320,7 @@ namespace ExecutableMalloc {
 		parent->changeProtection(from, to - from, newWritable);
 		this->writable = newWritable;
 	}
+
 	inline void MemoryMapping::gc(MemoryRegion* region)
 	{
 		usedRegions.erase(region);
