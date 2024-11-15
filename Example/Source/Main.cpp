@@ -11,11 +11,11 @@
 #include <memory>
 #include <print>
 
-ExecutableMalloc::MemoryBlockAllocator* allocator;
+static ExecutableMalloc::MemoryBlockAllocator* allocator;
 
 using namespace ExecutableMalloc;
 
-void printMemory()
+static void printMemory()
 {
 	std::size_t i = 0;
 	const auto& mappings = allocator->getMappings();
@@ -38,7 +38,7 @@ void printMemory()
 	}
 }
 
-void assertMemory(std::initializer_list<std::size_t> regions)
+static void assertMemory(std::initializer_list<std::size_t> regions)
 {
 	assert(allocator->getMappings().size() == regions.size());
 	const auto* regsize = regions.begin();
@@ -50,7 +50,7 @@ void assertMemory(std::initializer_list<std::size_t> regions)
 
 int main();
 
-void test()
+static void test()
 {
 	const auto pageSize_d = static_cast<double>(allocator->getGranularity());
 	printMemory();

@@ -125,11 +125,11 @@ namespace ExecutableMalloc {
 		{
 			if (dist(from, location) > tolerance || dist(to, location) > tolerance)
 				return std::nullopt;
-			for (bool reverse : { false, true }) {
+			for (const bool reverse : { false, true }) {
 				auto region = reverse ? findRegion(size) : findRegionReverse(size);
 				if (!region.has_value())
 					continue;
-				std::size_t distance = dist(region.value(), location);
+				const std::size_t distance = dist(region.value(), location);
 				if (distance > tolerance || dist(region.value() + size, location) > tolerance)
 					continue;
 				return { { region.value(), distance } };
@@ -229,7 +229,7 @@ namespace ExecutableMalloc {
 		{
 			return [func, granularity](std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
 				for (std::size_t offset = 0; offset < tolerance; offset += granularity)
-					for (bool positive : { false, true }) {
+					for (const bool positive : { false, true }) {
 						std::uintptr_t address = preferredLocation - preferredLocation % granularity;
 						if (positive)
 							address += offset;
