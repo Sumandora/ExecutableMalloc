@@ -5,9 +5,7 @@ allocator? Then look no further!*
 
 ## Usage
 
-### CMake
-
-Add the following to your CMakeLists.txt.
+Add the following to your CMakeLists.txt:
 
 ```cmake
 FetchContent_Declare(ExecutableMalloc
@@ -18,19 +16,7 @@ FetchContent_MakeAvailable(ExecutableMalloc)
 target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMalloc)
 ```
 
-If you are on a system that is posix-compliant, then you can also use the PosixAllocator extension.
-
-```cmake
-add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/Modules/PosixAllocator")
-target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocPosix)
-```
-
-If your system is not posix-compliant, then you may take a look at the PosixAllocator extension for some guidance to
-implement your own allocator.
-
-### C++
-
-Create your own MemoryBlockAllocator:
+After that create your own MemoryBlockAllocator like that:
 
 ```c++
 #include "ExecutableMalloc.hpp"
@@ -48,12 +34,27 @@ MemoryBlockAllocator allocator{
 };
 ```
 
-or use the PosixAllocator if you are using the posix extension:
+You can take a look at the PosixAllocator extension for some guidance to implement your own allocator.
+
+### Posix
+
+If you are on a system that is posix-compliant, then you can also use the PosixAllocator extension.
+
+Add the following to your CMakeLists.txt:
+
+```cmake
+add_subdirectory("${ExecutableMalloc_SOURCE_DIR}/Modules/PosixAllocator")
+target_link_libraries(${CMAKE_PROJECT_NAME} ExecutableMallocPosix)
+```
+
+Then include & instantiate like this:
 
 ```c++
 #include "ExecutableMalloc/PosixAllocator.hpp"
 ExecutableMalloc::PosixAllocator allocator;
 ```
+
+## Usage
 
 You can now use the `getRegion` member function to receive your allocated memory block:
 
@@ -64,4 +65,4 @@ auto region = allocator.getRegion(location, size, /*writable =*/ true, /*toleran
 
 The region will be deallocated when `region` goes out of scope.
 
-#### For more examples you can check the `Examples`-subdirectory
+**For more examples you can check the `Examples`-subdirectory**
