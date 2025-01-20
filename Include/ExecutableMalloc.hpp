@@ -159,8 +159,8 @@ namespace ExecutableMalloc {
 	};
 
 	template <typename Func>
-	concept AllocatorFunc = requires(const Func& f, std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& result) {
-		{ f(address, length, writable, result) } -> std::convertible_to<bool>;
+	concept AllocatorFunc = requires(const Func& f, std::uintptr_t address, std::size_t length, bool writable) {
+		{ f(address, length, writable) } -> std::same_as<std::optional<std::uintptr_t>>;
 	};
 
 	class MemoryBlockAllocator {
@@ -235,9 +235,8 @@ namespace ExecutableMalloc {
 							address += offset;
 						else
 							address -= offset;
-						std::uintptr_t pointer = 0;
-						if (func(address, granularity * numPages, writable, pointer))
-							return pointer;
+						if (auto pointer = func(address, granularity * numPages, writable); pointer.has_value())
+							return pointer.value();
 					}
 				throw std::bad_alloc{};
 			};

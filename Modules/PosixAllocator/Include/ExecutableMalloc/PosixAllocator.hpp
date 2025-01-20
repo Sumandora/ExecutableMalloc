@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <optional>
 #include <sys/mman.h>
 #include <unistd.h>
 
@@ -28,7 +29,7 @@ namespace ExecutableMalloc {
 	public:
 		PosixAllocator()
 			: MemoryBlockAllocator(
-				  search(getPageSize(), [](std::uintptr_t address, std::size_t length, bool writable, std::uintptr_t& pointer) {
+				  search(getPageSize(), [](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
 					  void* ptr = mmap(
 						  reinterpret_cast<void*>(address),
 						  length,
@@ -37,10 +38,9 @@ namespace ExecutableMalloc {
 						  -1,
 						  0);
 					  if (ptr != MAP_FAILED) {
-						  pointer = reinterpret_cast<std::uintptr_t>(ptr);
-						  return true;
+						  return reinterpret_cast<std::uintptr_t>(ptr);
 					  }
-					  return false;
+					  return std::nullopt;
 				  }),
 				  [](std::uintptr_t location, std::size_t size) {
 					  munmap(reinterpret_cast<void*>(location), size);
