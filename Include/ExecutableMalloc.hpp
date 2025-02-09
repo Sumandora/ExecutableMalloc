@@ -279,7 +279,7 @@ namespace ExecutableMalloc {
 				return mapping->acquireRegion(regionBegin, size);
 			}
 
-			// Mhm, I guess we are out of luck, we need to allocate new memory
+			// Mhm, no luck, new memory needs to be allocated
 			std::unique_ptr<MemoryMapping>& newRegion = allocateNewMap(preferredLocation, size, needsWritable, tolerance);
 
 			auto regionBounds = newRegion->findRegionInTolerance(preferredLocation, size, tolerance);
@@ -324,7 +324,7 @@ namespace ExecutableMalloc {
 	{
 		usedRegions.erase(region);
 		if (usedRegions.empty()) {
-			// F, I'm unemployed ._.
+			// This mapping is no longer needed.
 			parent->gc(this);
 		}
 	}
