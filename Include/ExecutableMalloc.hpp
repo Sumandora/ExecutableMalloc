@@ -165,9 +165,9 @@ namespace ExecutableMalloc {
 
 	class MemoryBlockAllocator {
 		std::vector<std::unique_ptr<MemoryMapping>> mappings;
-		std::function<std::uintptr_t(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable)> findUnusedMemory;
-		std::function<void(std::uintptr_t location, std::size_t size)> deallocateMemory;
-		std::function<void(std::uintptr_t location, std::size_t size, bool newWritable)> changeProtection;
+		std::uintptr_t (*findUnusedMemory)(void* self, std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable);
+		void (*deallocateMemory)(void* self, std::uintptr_t location, std::size_t size);
+		void (*changeProtection)(void* self, std::uintptr_t location, std::size_t size, bool newWritable);
 		std::size_t granularity; // (Page size); The functions declared above are expected to also respect this granularity
 
 		friend MemoryMapping;
@@ -202,7 +202,7 @@ namespace ExecutableMalloc {
 					return other.get() == page;
 				});
 			if (it != mappings.end()) {
-				deallocateMemory(page->from, page->to - page->from);
+				deallocateMemory(this, page->from, page->to - page->from);
 				mappings.erase(it);
 			}
 		}
@@ -216,7 +216,7 @@ namespace ExecutableMalloc {
 			// round up integer division
 			const size_t numPages = (size + granularity - 1) / granularity;
 
-			const std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
+			const std::uintptr_t newMem = findUnusedMemory(this, preferredLocation, tolerance, numPages, writable);
 			auto& newRegion = mappings.emplace_back(
 				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable });
 			return newRegion;
@@ -244,13 +244,13 @@ namespace ExecutableMalloc {
 
 	public:
 		MemoryBlockAllocator(
-			decltype(findUnusedMemory)&& findUnusedMemory,
-			decltype(deallocateMemory)&& deallocateMemory,
-			decltype(changeProtection)&& changePermissions,
+			decltype(findUnusedMemory) findUnusedMemory,
+			decltype(deallocateMemory) deallocateMemory,
+			decltype(changeProtection) changePermissions,
 			std::size_t granularity)
-			: findUnusedMemory(std::move(findUnusedMemory))
-			, deallocateMemory(std::move(deallocateMemory))
-			, changeProtection(std::move(changePermissions))
+			: findUnusedMemory(findUnusedMemory)
+			, deallocateMemory(deallocateMemory)
+			, changeProtection(changePermissions)
 			, granularity(granularity)
 		{
 		}
@@ -316,7 +316,7 @@ namespace ExecutableMalloc {
 		if (this->writable == newWritable)
 			return;
 
-		parent->changeProtection(from, to - from, newWritable);
+		parent->changeProtection(this, from, to - from, newWritable);
 		this->writable = newWritable;
 	}
 

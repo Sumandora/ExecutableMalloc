@@ -18,15 +18,23 @@ namespace ExecutableMalloc {
 	public:
 		explicit MemoryManagerAllocator(const MemMgr& memoryManager)
 			: MemoryBlockAllocator(
-				  search(memoryManager.getPageGranularity(),
-					  [&memoryManager](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
-						  return memoryManager.allocateAt(address, length, { true, writable, true });
-					  }),
-				  [&memoryManager](std::uintptr_t location, std::size_t size) {
-					  memoryManager.deallocate(location, size);
+				  +[](void* self, std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
+					  auto* memMgrAllocator = static_cast<MemoryManagerAllocator<MemMgr>*>(self);
+					  const auto* memoryManager = memMgrAllocator->memoryManager;
+					  return search(memoryManager->getPageGranularity(),
+						  [memoryManager](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
+							  return memoryManager->allocateAt(address, length, { true, writable, true });
+						  })(preferredLocation, tolerance, numPages, writable);
 				  },
-				  [&memoryManager](std::uintptr_t location, std::size_t size, bool newWritable) {
-					  memoryManager.protect(location, size, { true, newWritable, true });
+				  +[](void* self, std::uintptr_t location, std::size_t size) {
+					  auto* memMgrAllocator = static_cast<MemoryManagerAllocator<MemMgr>*>(self);
+					  const auto* memoryManager = memMgrAllocator->memoryManager;
+					  memoryManager->deallocate(location, size);
+				  },
+				  +[](void* self, std::uintptr_t location, std::size_t size, bool newWritable) {
+					  auto* memMgrAllocator = static_cast<MemoryManagerAllocator<MemMgr>*>(self);
+					  const auto* memoryManager = memMgrAllocator->memoryManager;
+					  memoryManager->protect(location, size, { true, newWritable, true });
 				  },
 				  memoryManager.getPageGranularity())
 			, memoryManager(&memoryManager)

@@ -29,23 +29,26 @@ namespace ExecutableMalloc {
 	public:
 		PosixAllocator()
 			: MemoryBlockAllocator(
-				  search(getPageSize(), [](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
-					  void* ptr = mmap(
-						  reinterpret_cast<void*>(address),
-						  length,
-						  getFlags(writable),
-						  MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
-						  -1,
-						  0);
-					  if (ptr != MAP_FAILED) {
-						  return reinterpret_cast<std::uintptr_t>(ptr);
-					  }
-					  return std::nullopt;
-				  }),
-				  [](std::uintptr_t location, std::size_t size) {
+				  +[](void* self, std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
+					  return search(getPageSize(),
+						  [](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
+							  void* ptr = mmap(
+								  reinterpret_cast<void*>(address),
+								  length,
+								  getFlags(writable),
+								  MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
+								  -1,
+								  0);
+							  if (ptr != MAP_FAILED) {
+								  return reinterpret_cast<std::uintptr_t>(ptr);
+							  }
+							  return std::nullopt;
+						  })(preferredLocation, tolerance, numPages, writable);
+				  },
+				  +[](void*, std::uintptr_t location, std::size_t size) {
 					  munmap(reinterpret_cast<void*>(location), size);
 				  },
-				  [](std::uintptr_t location, std::size_t size, bool newWritable) {
+				  +[](void*, std::uintptr_t location, std::size_t size, bool newWritable) {
 					  mprotect(reinterpret_cast<void*>(location), size, getFlags(newWritable));
 				  },
 				  getPageSize())

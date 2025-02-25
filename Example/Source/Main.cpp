@@ -2,7 +2,8 @@
 #include "ExecutableMalloc/PosixAllocator.hpp"
 
 // Include to verify, that this compiles
-#include "ExecutableMalloc/MemoryManagerAllocator.hpp" // IWYU pragma: keep
+#include "ExecutableMalloc/MemoryManagerAllocator.hpp"
+#include "MemoryManager/LinuxMemoryManager.hpp"
 
 #include <cassert>
 #include <cstddef>
@@ -11,7 +12,7 @@
 #include <memory>
 #include <print>
 
-static ExecutableMalloc::MemoryBlockAllocator* allocator;
+static std::unique_ptr<ExecutableMalloc::MemoryBlockAllocator> allocator;
 
 using namespace ExecutableMalloc;
 
@@ -78,7 +79,13 @@ static void test()
 
 int main()
 {
-	allocator = new ExecutableMalloc::PosixAllocator{};
+	{
+		// Instantiate the template to test if it compiles.
+		const MemoryManager::LinuxMemoryManager<true, true, true> memMgr;
+		const ExecutableMalloc::MemoryManagerAllocator<decltype(memMgr)> dummy{ memMgr };
+	}
+
+	allocator = std::make_unique<ExecutableMalloc::PosixAllocator>();
 	assertMemory({});
 	test();
 	printMemory();
