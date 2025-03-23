@@ -20,18 +20,28 @@ After that create your own MemoryBlockAllocator like that:
 
 ```c++
 #include "ExecutableMalloc.hpp"
-MemoryBlockAllocator allocator{
-	+[](void* self, std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) {
+
+class MyAllocator : public MemoryBlockAllocator {
+public:
+	MyAllocator()
+		: MemoryBlockAllocator(PAGE_SIZE)
+	{
+	}
+
+	std::uintptr_t findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
+	{
 		// TODO Allocate numPages memory pages that lies at preferredLocation +/- tolerance
-		return 0UL;
-	},
-	+[](void* self, std::uintptr_t location, std::size_t size) {
+	}
+
+	void deallocateMemory(std::uintptr_t location, std::size_t size) override
+	{
 		// TODO Deallocate the memory pages
-	},
-	+[](void* self, std::uintptr_t location, std::size_t size, bool writable) {
+	}
+
+	void changeProtection(std::uintptr_t location, std::size_t size, bool newWritable) override
+	{
 		// TODO Change protection to writable
-	},
-	PAGE_SIZE,
+	}
 };
 ```
 
