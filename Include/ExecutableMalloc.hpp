@@ -165,10 +165,7 @@ namespace ExecutableMalloc {
 
 	class MemoryBlockAllocator {
 		std::vector<std::unique_ptr<MemoryMapping>> mappings;
-		std::uintptr_t (*findUnusedMemory)(void* self, std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable);
-		void (*deallocateMemory)(void* self, std::uintptr_t location, std::size_t size);
-		void (*changeProtection)(void* self, std::uintptr_t location, std::size_t size, bool newWritable);
-		std::size_t granularity; // (Page size); The functions declared above are expected to also respect this granularity
+		std::size_t granularity;
 
 		friend MemoryMapping;
 
@@ -202,7 +199,7 @@ namespace ExecutableMalloc {
 					return other.get() == page;
 				});
 			if (it != mappings.end()) {
-				deallocateMemory(this, page->from, page->to - page->from);
+				deallocateMemory(page->from, page->to - page->from);
 				mappings.erase(it);
 			}
 		}
@@ -216,7 +213,7 @@ namespace ExecutableMalloc {
 			// round up integer division
 			const size_t numPages = (size + granularity - 1) / granularity;
 
-			const std::uintptr_t newMem = findUnusedMemory(this, preferredLocation, tolerance, numPages, writable);
+			const std::uintptr_t newMem = findUnusedMemory(preferredLocation, tolerance, numPages, writable);
 			auto& newRegion = mappings.emplace_back(
 				new MemoryMapping{ this, newMem, newMem + numPages * granularity, writable });
 			return newRegion;
@@ -243,15 +240,10 @@ namespace ExecutableMalloc {
 		}
 
 	public:
-		MemoryBlockAllocator(
-			decltype(findUnusedMemory) findUnusedMemory,
-			decltype(deallocateMemory) deallocateMemory,
-			decltype(changeProtection) changePermissions,
+		explicit MemoryBlockAllocator(
+			// (Page size); The virtual functions are expected to also respect this granularity
 			std::size_t granularity)
-			: findUnusedMemory(findUnusedMemory)
-			, deallocateMemory(deallocateMemory)
-			, changeProtection(changePermissions)
-			, granularity(granularity)
+			: granularity(granularity)
 		{
 		}
 		MemoryBlockAllocator() = delete;
@@ -293,6 +285,10 @@ namespace ExecutableMalloc {
 		{
 			return granularity;
 		}
+
+		virtual std::uintptr_t findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) = 0;
+		virtual void deallocateMemory(std::uintptr_t location, std::size_t size) = 0;
+		virtual void changeProtection(std::uintptr_t location, std::size_t size, bool newWritable) = 0;
 	};
 
 	// Definitions:
@@ -316,7 +312,7 @@ namespace ExecutableMalloc {
 		if (this->writable == newWritable)
 			return;
 
-		parent->changeProtection(this, from, to - from, newWritable);
+		parent->changeProtection(from, to - from, newWritable);
 		this->writable = newWritable;
 	}
 
