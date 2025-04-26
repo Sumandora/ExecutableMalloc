@@ -12,13 +12,13 @@
 namespace ExecutableMalloc {
 
 	class PosixAllocator : public MemoryBlockAllocator {
-		static int getPageSize()
+		static int get_page_size()
 		{
-			static const int pagesize = getpagesize(); // Reduce the sys-calls
-			return pagesize;
+			static const int PAGESIZE = getpagesize(); // Reduce the system calls
+			return PAGESIZE;
 		}
 
-		static constexpr int getFlags(bool writable)
+		static constexpr int get_flags(bool writable)
 		{
 			int prot = PROT_READ | PROT_EXEC;
 			if (writable)
@@ -28,18 +28,18 @@ namespace ExecutableMalloc {
 
 	public:
 		PosixAllocator()
-			: MemoryBlockAllocator(getPageSize())
+			: MemoryBlockAllocator(get_page_size())
 		{
 		}
 
-		std::uintptr_t findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
+		std::uintptr_t find_unused_memory(std::uintptr_t preferred_location, std::size_t tolerance, std::size_t num_pages, bool writable) override
 		{
-			return search(getPageSize(),
+			return search(get_page_size(),
 				[](std::uintptr_t address, std::size_t length, bool writable) -> std::optional<std::uintptr_t> {
 					void* ptr = mmap(
 						reinterpret_cast<void*>(address),
 						length,
-						getFlags(writable),
+						get_flags(writable),
 						MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED_NOREPLACE,
 						-1,
 						0);
@@ -47,17 +47,17 @@ namespace ExecutableMalloc {
 						return reinterpret_cast<std::uintptr_t>(ptr);
 					}
 					return std::nullopt;
-				})(preferredLocation, tolerance, numPages, writable);
+				})(preferred_location, tolerance, num_pages, writable);
 		}
 
-		void deallocateMemory(std::uintptr_t location, std::size_t size) override
+		void deallocate_memory(std::uintptr_t location, std::size_t size) override
 		{
 			munmap(reinterpret_cast<void*>(location), size);
 		}
 
-		void changeProtection(std::uintptr_t location, std::size_t size, bool newWritable) override
+		void change_protection(std::uintptr_t location, std::size_t size, bool new_writable) override
 		{
-			mprotect(reinterpret_cast<void*>(location), size, getFlags(newWritable));
+			mprotect(reinterpret_cast<void*>(location), size, get_flags(new_writable));
 		}
 	};
 

@@ -28,17 +28,17 @@ public:
 	{
 	}
 
-	std::uintptr_t findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
+	std::uintptr_t find_unused_memory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
 	{
 		// TODO Allocate numPages memory pages that lies at preferredLocation +/- tolerance
 	}
 
-	void deallocateMemory(std::uintptr_t location, std::size_t size) override
+	void deallocate_memory(std::uintptr_t location, std::size_t size) override
 	{
 		// TODO Deallocate the memory pages
 	}
 
-	void changeProtection(std::uintptr_t location, std::size_t size, bool newWritable) override
+	void change_protection(std::uintptr_t location, std::size_t size, bool newWritable) override
 	{
 		// TODO Change protection to writable
 	}
@@ -71,7 +71,7 @@ You can now use the `getRegion` member function to receive your allocated memory
 
 ```c++
 // 'tolerance' and 'writable' are optional parameters
-auto region = allocator.getRegion(location, size, /*writable =*/ true, /*tolerance =*/ INT32_MAX);
+auto region = allocator.get_region(location, size, /*writable =*/ true, /*tolerance =*/ INT32_MAX);
 ```
 
 The region will be deallocated when `region` goes out of scope.

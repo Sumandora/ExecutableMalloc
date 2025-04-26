@@ -12,33 +12,33 @@ namespace ExecutableMalloc {
 	template <typename MemMgr>
 		requires MemoryManager::PositionedAllocator<MemMgr> && MemoryManager::Deallocator<MemMgr> && MemoryManager::Protector<MemMgr>
 	class MemoryManagerAllocator : public MemoryBlockAllocator {
-		const MemMgr* memoryManager;
+		const MemMgr* memory_manager;
 
 	public:
-		explicit MemoryManagerAllocator(const MemMgr& memoryManager)
-			: MemoryBlockAllocator(memoryManager.getPageGranularity())
-			, memoryManager(&memoryManager)
+		explicit MemoryManagerAllocator(const MemMgr& memory_manager)
+			: MemoryBlockAllocator(memory_manager.getPageGranularity())
+			, memory_manager(&memory_manager)
 		{
 		}
 
-		[[nodiscard]] const MemMgr* getMemoryManager() const { return memoryManager; }
+		[[nodiscard]] const MemMgr* get_memory_manager() const { return memory_manager; }
 
-		std::uintptr_t findUnusedMemory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
+		std::uintptr_t find_unused_memory(std::uintptr_t preferred_location, std::size_t tolerance, std::size_t num_pages, bool writable) override
 		{
-			return search(memoryManager->getPageGranularity(),
+			return search(memory_manager->getPageGranularity(),
 				[this](std::uintptr_t address, std::size_t length, bool writable) {
-					return memoryManager->allocateAt(address, length, { true, writable, true });
-				})(preferredLocation, tolerance, numPages, writable);
+					return memory_manager->allocateAt(address, length, { true, writable, true });
+				})(preferred_location, tolerance, num_pages, writable);
 		}
 
-		void deallocateMemory(std::uintptr_t location, std::size_t size) override
+		void deallocate_memory(std::uintptr_t location, std::size_t size) override
 		{
-			memoryManager->deallocate(location, size);
+			memory_manager->deallocate(location, size);
 		}
 
-		void changeProtection(std::uintptr_t location, std::size_t size, bool newWritable) override
+		void change_protection(std::uintptr_t location, std::size_t size, bool new_writable) override
 		{
-			memoryManager->protect(location, size, { true, newWritable, true });
+			memory_manager->protect(location, size, { true, new_writable, true });
 		}
 	};
 
