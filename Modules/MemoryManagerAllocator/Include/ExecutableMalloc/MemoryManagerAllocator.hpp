@@ -16,7 +16,7 @@ namespace ExecutableMalloc {
 
 	public:
 		explicit MemoryManagerAllocator(const MemMgr& memory_manager)
-			: MemoryBlockAllocator(memory_manager.getPageGranularity())
+			: MemoryBlockAllocator(memory_manager.get_page_granularity())
 			, memory_manager(&memory_manager)
 		{
 		}
@@ -25,9 +25,9 @@ namespace ExecutableMalloc {
 
 		std::uintptr_t find_unused_memory(std::uintptr_t preferred_location, std::size_t tolerance, std::size_t num_pages, bool writable) override
 		{
-			return search(memory_manager->getPageGranularity(),
+			return search(memory_manager->get_page_granularity(),
 				[this](std::uintptr_t address, std::size_t length, bool writable) {
-					return memory_manager->allocateAt(address, length, { true, writable, true });
+					return memory_manager->allocate_at(address, length, { true, writable, true });
 				})(preferred_location, tolerance, num_pages, writable);
 		}
 

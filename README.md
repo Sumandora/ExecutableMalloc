@@ -28,9 +28,9 @@ public:
 	{
 	}
 
-	std::uintptr_t find_unused_memory(std::uintptr_t preferredLocation, std::size_t tolerance, std::size_t numPages, bool writable) override
+	std::uintptr_t find_unused_memory(std::uintptr_t preferred_location, std::size_t tolerance, std::size_t num_pages, bool writable) override
 	{
-		// TODO Allocate numPages memory pages that lies at preferredLocation +/- tolerance
+		// TODO Allocate num_pages memory pages that lies at preferred_location +/- tolerance
 	}
 
 	void deallocate_memory(std::uintptr_t location, std::size_t size) override
@@ -38,7 +38,7 @@ public:
 		// TODO Deallocate the memory pages
 	}
 
-	void change_protection(std::uintptr_t location, std::size_t size, bool newWritable) override
+	void change_protection(std::uintptr_t location, std::size_t size, bool new_writable) override
 	{
 		// TODO Change protection to writable
 	}
@@ -67,7 +67,7 @@ ExecutableMalloc::PosixAllocator allocator;
 
 ## Usage
 
-You can now use the `getRegion` member function to receive your allocated memory block:
+You can now use the `get_region` member function to receive your allocated memory block:
 
 ```c++
 // 'tolerance' and 'writable' are optional parameters

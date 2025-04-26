@@ -182,10 +182,10 @@ namespace ExecutableMalloc {
 				auto region = mapping->find_region_in_tolerance(location, size, tolerance);
 				if (!region.has_value())
 					continue;
-				auto [regionBegin, distance] = region.value();
+				auto [region_begin, distance] = region.value();
 				if (distance < best_distance) {
 					best = it;
-					best_location = regionBegin;
+					best_location = region_begin;
 					best_distance = distance;
 				}
 			}
@@ -263,12 +263,12 @@ namespace ExecutableMalloc {
 			if (size == 0)
 				throw std::bad_alloc{};
 
-			auto [iter, regionBegin] = find_closest(preferred_location, size, tolerance);
+			auto [iter, region_begin] = find_closest(preferred_location, size, tolerance);
 			if (iter != mappings.end()) {
 				auto& mapping = *iter;
 				if (needs_writable && !mapping->is_writable())
 					mapping->set_writable(needs_writable);
-				return mapping->acquire_region(regionBegin, size);
+				return mapping->acquire_region(region_begin, size);
 			}
 
 			// Mhm, no luck, new memory needs to be allocated
