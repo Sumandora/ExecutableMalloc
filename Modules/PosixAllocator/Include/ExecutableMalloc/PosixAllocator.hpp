@@ -14,8 +14,8 @@ namespace ExecutableMalloc {
 	class PosixAllocator : public MemoryBlockAllocator {
 		static int get_page_size()
 		{
-			static const int PAGESIZE = getpagesize(); // Reduce the system calls
-			return PAGESIZE;
+			static const int CACHED_PAGE_SIZE = getpagesize(); // Reduce the system calls
+			return CACHED_PAGE_SIZE;
 		}
 
 		static constexpr int get_flags(bool writable)
